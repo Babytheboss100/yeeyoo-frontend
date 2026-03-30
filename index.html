@@ -672,7 +672,9 @@ function toggleMode(){
   document.getElementById('authToggle').innerHTML=authMode==='register'?'Har du konto? <span>Logg inn</span>':'Ingen konto? <span>Registrer deg</span>'
   document.getElementById('authErr').style.display='none'
 }
+let isSubmitting=false
 async function doAuth(){
+  if(isSubmitting)return;isSubmitting=true
   const email=document.getElementById('authEmail').value.trim()
   const pass=document.getElementById('authPass').value
   const name=document.getElementById('authName').value.trim()
@@ -682,7 +684,8 @@ async function doAuth(){
     const b=authMode==='register'?{name,email,password:pass}:{email,password:pass}
     const d=await req('/auth/'+(authMode==='register'?'register':'login'),{method:'POST',body:JSON.stringify(b)})
     token=d.token;currentUser=d.user;localStorage.setItem('yeeyoo_token',token);showApp()
-  }catch(e){errEl.textContent=e.message;errEl.style.display='block';document.getElementById('authBtn').textContent=authMode==='register'?'Registrer deg →':'Logg inn →'}
+  }catch(e){errEl.textContent=e.message;errEl.style.display='block';document.getElementById('authBtn').textContent=authMode==='register'?'Registrer deg →':'Logg inn →'
+  }finally{isSubmitting=false}
 }
 function logout(){token=null;currentUser=null;localStorage.removeItem('yeeyoo_token');showAuth();document.getElementById('authEmail').value='';document.getElementById('authPass').value=''}
 async function showApp(){
