@@ -273,6 +273,13 @@ body::after{
 .rbtn.del:hover{background:rgba(248,113,113,.12)}
 .rbtn.regen{color:var(--blue2);border-color:rgba(79,127,255,.2)}
 .rbtn.regen:hover{background:rgba(79,127,255,.1)}
+.rbtn.img{color:#f59e0b;border-color:rgba(245,158,11,.2)}
+.rbtn.img:hover{background:rgba(245,158,11,.1)}
+.rbtn.img.loading{opacity:.6;pointer-events:none}
+.rc-image{margin:0 16px 12px;border-radius:10px;overflow:hidden;border:1px solid var(--border)}
+.rc-image img{width:100%;display:block;border-radius:10px}
+.rc-image-placeholder{display:flex;align-items:center;justify-content:center;height:120px;background:rgba(255,255,255,.03);border-radius:10px;color:var(--muted);font-size:13px}
+
 
 /* ── QUEUE ── */
 .queue-wrap{flex:1;overflow-y:auto;padding:24px}
@@ -743,6 +750,26 @@ async function generate(){
   }catch(e){toast(e.message,'err')}
   finally{btn.disabled=false;btn.textContent='▶ Generer';led.className='led ok';document.getElementById('ledTxt').textContent='Klar';setTimeout(()=>{led.className='led'},3000)}
 }
+
+async function genImage(postId){
+  const btn=document.getElementById('imgbtn-'+postId)
+  const imgArea=document.getElementById('img-'+postId)
+  const body=document.getElementById('body-'+postId)
+  if(!body)return
+  btn.classList.add('loading')
+  btn.textContent='⏳ Genererer...'
+  try{
+    const text=body.innerText.substring(0,300)
+    const d=await req('/content/generate-image',{method:'POST',body:JSON.stringify({postId,text})})
+    if(d.url){
+      imgArea.style.display='block'
+      imgArea.innerHTML=`<img src="${d.url}" alt="Generert bilde" />`
+      toast('Bilde generert ✓','ok')
+    }
+  }catch(e){toast('Bilde feilet: '+e.message,'err')}
+  finally{btn.classList.remove('loading');btn.textContent='🖼 Bilde'}
+}
+
 function renderResults(posts){
   const area=document.getElementById('resultsArea');if(!posts.length)return
   const dc={linkedin:'dot-linkedin',facebook:'dot-facebook',instagram:'dot-instagram',twitter:'dot-twitter'}
@@ -769,7 +796,8 @@ function renderResults(posts){
         <button class="rbtn regen" onclick="regenPost('${p.id}','${p.platform}')">↻ Regenerer</button>
         <button class="rbtn" onclick="copyPost('${p.id}')">⎘ Kopi</button>
         <button class="rbtn del" onclick="delPost('${p.id}')">✕</button>
-      </div>
+        <button class="rbtn img" id="imgbtn-${p.id}" onclick="genImage('${p.id}')">🖼 Bilde</button>
+            <div class="rc-image" id="img-${p.id}" style="display:none"></div>
     </div>`}).join('')
 }
 function updCC(id){const b=document.getElementById('body-'+id),c=document.getElementById('cc-'+id);if(b&&c)c.textContent=b.innerText.length+' tegn'}
