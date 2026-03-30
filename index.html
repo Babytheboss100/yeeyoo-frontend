@@ -717,6 +717,11 @@ function renderTpl(){
     </div>`).join('')
 }
 function selTpl(id){selectedTemplate=id;renderTpl();document.getElementById('customPrompt').style.display=id==='custom'?'block':'none'}
+function togglePlat(btn){
+  btn.classList.toggle('active')
+  const active=document.querySelectorAll('.plat-btn.active')
+  if(!active.length)btn.classList.add('active')
+}
 function toggleAI(btn){
   btn.classList.toggle('active')
   // Ensure at least one is always active
