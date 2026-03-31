@@ -867,9 +867,9 @@ async function loadStats(){
 // ─── BILLING ──────────────────────────────────────────────────────────────────
 const PLANS_UI = {
   free:    { name:'Gratis',         price:'0',   color:'var(--muted)' },
-  starter: { name:'Grunnleggende',  price:'$29', color:'var(--blue2)' },
-  vekst:   { name:'Vekst',          price:'$79', color:'var(--purple2)' },
-  bedrift: { name:'Bedrift',        price:'$149',color:'var(--ok)' }
+  starter: { name:'Grunnleggende',  price:'299 kr', color:'var(--blue2)' },
+  vekst:   { name:'Vekst',          price:'599 kr', color:'var(--purple2)' },
+  bedrift: { name:'Bedrift',        price:'899 kr',color:'var(--ok)' }
 }
 
 async function loadBilling() {
@@ -896,8 +896,8 @@ async function loadBilling() {
     const btns = document.getElementById('planButtons')
     if (planId === 'free' || planId === 'starter') {
       btns.innerHTML = `
-        <button class="btn-pri" onclick="checkout('vekst')" style="width:100%">⬆ Oppgrader til Vekst — $79/mnd</button>
-        <button class="btn-pri" onclick="checkout('bedrift')" style="width:100%;background:linear-gradient(135deg,#1edc7a,#0a9955)">⬆ Bedrift — $149/mnd</button>
+        <button class="btn-pri" onclick="checkout('vekst')" style="width:100%">⬆ Oppgrader til Vekst — 599 kr/mnd</button>
+        <button class="btn-pri" onclick="checkout('bedrift')" style="width:100%;background:linear-gradient(135deg,#1edc7a,#0a9955)">⬆ Bedrift — 899 kr/mnd</button>
       `
     } else {
       btns.innerHTML = `<button class="btn-sec" onclick="openPortal()" style="width:100%">Administrer abonnement →</button>`
