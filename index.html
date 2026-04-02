@@ -563,6 +563,7 @@ body::after{
 <body>
 
 <!-- AUTH -->
+<div id="loadingScreen" style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:var(--navy)"><div style="text-align:center"><div style="width:40px;height:40px;border:3px solid rgba(255,255,255,.1);border-top-color:var(--purple2);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto"></div><div style="margin-top:16px;color:var(--muted);font-size:13px;font-weight:600">Yeeyoo</div></div></div>
 <div class="auth-wrap" id="authWrap" style="display:none">
   <div class="auth-box">
     <div class="auth-logo">
@@ -971,9 +972,18 @@ window.onload=async()=>{
 
   if(token){
     try{
-      const me=await req('/auth/me')
-      if(me.id){currentUser=me;showApp();return}
-    }catch{
+      // Validate token with 8s timeout
+      const controller=new AbortController()
+      const timeout=setTimeout(()=>controller.abort(),8000)
+      const h={'Content-Type':'application/json','Authorization':'Bearer '+token}
+      const r=await fetch(API+'/auth/me',{headers:h,signal:controller.signal})
+      clearTimeout(timeout)
+      if(!r.ok)throw new Error('invalid')
+      const me=await r.json()
+      if(me&&me.id){currentUser=me;showApp();return}
+      throw new Error('no user')
+    }catch(e){
+      console.log('[auth] Token validation failed:',e.message)
       token=null;localStorage.removeItem('yeeyoo_token')
     }
   }
@@ -989,7 +999,8 @@ async function req(path,opts={}){
   const r=await fetch(API+path,{...opts,headers:{...h,...(opts.headers||{})}})
   const d=await r.json();if(!r.ok)throw new Error(d.error||'Feil');return d
 }
-function showAuth(){document.getElementById('authWrap').style.display='flex';document.getElementById('app').style.display='none'}
+function hideLoading(){const l=document.getElementById('loadingScreen');if(l)l.style.display='none'}
+function showAuth(){hideLoading();document.getElementById('authWrap').style.display='flex';document.getElementById('app').style.display='none'}
 function toggleMode(){
   authMode=authMode==='login'?'register':'login'
   document.getElementById('nameField').style.display=authMode==='register'?'block':'none'
@@ -1042,6 +1053,7 @@ async function resendVerification(email){
   }catch(e){toast(e.message,'err')}
 }
 async function showApp(){
+  hideLoading()
   document.getElementById('authWrap').style.display='none'
   document.getElementById('app').style.display='flex'
   const n=currentUser?.name||'?'
