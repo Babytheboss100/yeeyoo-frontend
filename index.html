@@ -607,6 +607,24 @@ body::after{
   </div>
 </div>
 
+<!-- BETA GATE -->
+<div class="auth-wrap" id="betaGate" style="display:none">
+  <div class="auth-box" style="text-align:center">
+    <div style="font-size:48px;margin-bottom:16px">🔒</div>
+    <div style="font-size:20px;font-weight:800;color:var(--white);margin-bottom:8px">Lukket beta</div>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:24px;line-height:1.6">
+      Yeeyoo er i lukket beta. Legg igjen e-posten din så sender vi deg en invitasjon når plassen din er klar.
+    </p>
+    <div class="auth-err" id="betaMsg" style="display:none"></div>
+    <div class="auth-field">
+      <label class="auth-label">E-post</label>
+      <input class="auth-input" id="betaEmail" placeholder="din@epost.no" type="email" onkeydown="if(event.key==='Enter')requestBetaAccess()">
+    </div>
+    <button class="auth-btn" onclick="requestBetaAccess()" id="betaBtn">Søk om tilgang →</button>
+    <div class="auth-toggle" onclick="closeBetaGate()" style="margin-top:16px">Har du allerede tilgang? <span>Logg inn</span></div>
+  </div>
+</div>
+
 <!-- APP -->
 <div class="app" id="app">
   <div class="topbar">
@@ -969,7 +987,11 @@ window.onload=async()=>{
     setTimeout(()=>toast(L('emailVerified'),'ok'),500)
   }
   if(oauthError){
-    setTimeout(()=>toast('Innlogging feilet: '+oauthError,'err'),500)
+    if(oauthError==='invite_only'){
+      setTimeout(()=>showBetaGate(),300)
+    }else{
+      setTimeout(()=>toast('Innlogging feilet: '+oauthError,'err'),500)
+    }
   }
 
   if(token){
@@ -1037,8 +1059,11 @@ async function doAuth(){
     token=d.token;currentUser=d.user;sessionStorage.setItem('yeeyoo_token',token);showApp()
   }catch(e){
     const errData=e.message
-    // Check if it's a verification error from login
-    if(errData.includes('ikke bekreftet')){
+    if(errData.includes('invite_only')||errData.includes('lukket beta')){
+      // Show beta gate
+      showBetaGate()
+      document.getElementById('betaEmail').value=email
+    }else if(errData.includes('ikke bekreftet')){
       errEl.style.display='block'
       errEl.style.background='rgba(251,191,36,.1)';errEl.style.borderColor='rgba(251,191,36,.3)';errEl.style.color='#fbbf24'
       errEl.innerHTML=`⚠️ ${errData}<br><button onclick="resendVerification('${email}')" style="margin-top:8px;padding:6px 14px;border:1px solid rgba(251,191,36,.3);background:transparent;color:#fbbf24;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600">Send verifiseringsmail på nytt</button>`
@@ -1051,6 +1076,26 @@ async function doAuth(){
 function logout(){token=null;currentUser=null;sessionStorage.removeItem('yeeyoo_token');showAuth();document.getElementById('authEmail').value='';document.getElementById('authPass').value=''}
 function loginWithGoogle(){window.location.href=API+'/auth/google'}
 function loginWithVipps(){window.location.href=API+'/auth/vipps'}
+function showBetaGate(){
+  document.getElementById('authWrap').style.display='none'
+  document.getElementById('betaGate').style.display='flex'
+}
+function closeBetaGate(){
+  document.getElementById('betaGate').style.display='none'
+  document.getElementById('authWrap').style.display='flex'
+}
+async function requestBetaAccess(){
+  const email=document.getElementById('betaEmail').value.trim()
+  if(!email){toast('Skriv inn e-post','err');return}
+  const btn=document.getElementById('betaBtn');btn.disabled=true;btn.innerHTML='<span class="spin"></span>'
+  try{
+    const d=await req('/auth/request-access',{method:'POST',body:JSON.stringify({email})})
+    const msg=document.getElementById('betaMsg')
+    msg.style.display='block';msg.style.background='rgba(74,222,128,.1)';msg.style.borderColor='rgba(74,222,128,.3)';msg.style.color='#4ade80'
+    msg.textContent='✅ '+d.message
+    btn.textContent='Søknad sendt ✓';btn.disabled=true
+  }catch(e){toast(e.message,'err');btn.disabled=false;btn.textContent='Søk om tilgang →'}
+}
 async function resendVerification(email){
   try{
     const d=await req('/auth/resend-verification',{method:'POST',body:JSON.stringify({email})})
