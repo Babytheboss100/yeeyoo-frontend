@@ -625,7 +625,15 @@ body::after{
       <div class="tb-tab" onclick="showTab('settings')" data-tab="settings">⚙ Innstillinger</div>
     </div>
     <div class="tb-right">
-      <button class="lang-toggle" id="appLangBtn" onclick="toggleAppLang()" style="padding:4px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--card);color:var(--white);font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.5px">EN</button>
+      <div style="position:relative">
+        <button id="appLangBtn" onclick="document.getElementById('langDrop').classList.toggle('open')" style="padding:4px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--card);color:var(--white);font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer">🇳🇴 NO</button>
+        <div id="langDrop" style="display:none;position:absolute;top:100%;right:0;margin-top:4px;background:var(--navy3);border:1px solid var(--border2);border-radius:8px;overflow:hidden;z-index:200;min-width:110px;box-shadow:0 10px 30px rgba(0,0,0,.5)">
+          <div onclick="setAppLang('no')" style="padding:8px 14px;cursor:pointer;font-size:12px;font-weight:600;transition:background .15s" onmouseover="this.style.background='var(--card2)'" onmouseout="this.style.background='transparent'">🇳🇴 Norsk</div>
+          <div onclick="setAppLang('en')" style="padding:8px 14px;cursor:pointer;font-size:12px;font-weight:600;transition:background .15s" onmouseover="this.style.background='var(--card2)'" onmouseout="this.style.background='transparent'">🇬🇧 English</div>
+          <div onclick="setAppLang('es')" style="padding:8px 14px;cursor:pointer;font-size:12px;font-weight:600;transition:background .15s" onmouseover="this.style.background='var(--card2)'" onmouseout="this.style.background='transparent'">🇪🇸 Español</div>
+          <div onclick="setAppLang('pt')" style="padding:8px 14px;cursor:pointer;font-size:12px;font-weight:600;transition:background .15s" onmouseover="this.style.background='var(--card2)'" onmouseout="this.style.background='transparent'">🇧🇷 Português</div>
+        </div>
+      </div>
       <div class="notif-bell" onclick="toggleNotifPanel()">
         🔔<span class="notif-badge" id="notifBadge" style="display:none">0</span>
         <div class="notif-panel" id="notifPanel">
@@ -947,7 +955,7 @@ window.onload=async()=>{
     token=oauthToken;localStorage.setItem('yeeyoo_token',token)
   }
   if(verified==='true'){
-    setTimeout(()=>toast('E-post bekreftet ✓ Velkommen!','ok'),500)
+    setTimeout(()=>toast(L('emailVerified'),'ok'),500)
   }
   if(oauthError){
     setTimeout(()=>toast('Innlogging feilet: '+oauthError,'err'),500)
@@ -977,8 +985,8 @@ function showAuth(){document.getElementById('authWrap').style.display='flex';doc
 function toggleMode(){
   authMode=authMode==='login'?'register':'login'
   document.getElementById('nameField').style.display=authMode==='register'?'block':'none'
-  document.getElementById('authBtn').textContent=authMode==='register'?'Registrer deg →':'Logg inn →'
-  document.getElementById('authToggle').innerHTML=authMode==='register'?'Har du konto? <span>Logg inn</span>':'Ingen konto? <span>Registrer deg</span>'
+  document.getElementById('authBtn').textContent=authMode==='register'?L('authRegister'):L('authLogin')
+  document.getElementById('authToggle').innerHTML=authMode==='register'?`${L('authHasAccount')} <span>${L('authLoginLink')}</span>`:`${L('authNoAccount')} <span>${L('authRegisterLink')}</span>`
   document.getElementById('authErr').style.display='none'
 }
 let isSubmitting=false
@@ -998,7 +1006,7 @@ async function doAuth(){
       errEl.style.display='block'
       errEl.style.background='rgba(74,222,128,.1)';errEl.style.borderColor='rgba(74,222,128,.3)';errEl.style.color='#4ade80'
       errEl.innerHTML=`✅ ${d.message||'Sjekk e-posten din for å aktivere kontoen.'}<br><button onclick="resendVerification('${email}')" style="margin-top:8px;padding:6px 14px;border:1px solid rgba(74,222,128,.3);background:transparent;color:#4ade80;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600">Send på nytt</button>`
-      document.getElementById('authBtn').textContent=authMode==='register'?'Registrer deg →':'Logg inn →'
+      document.getElementById('authBtn').textContent=authMode==='register'?L('authRegister'):L('authLogin')
       return
     }
 
@@ -1013,7 +1021,7 @@ async function doAuth(){
     }else{
       errEl.textContent=errData;errEl.style.display='block'
     }
-    document.getElementById('authBtn').textContent=authMode==='register'?'Registrer deg →':'Logg inn →'
+    document.getElementById('authBtn').textContent=authMode==='register'?L('authRegister'):L('authLogin')
   }finally{isSubmitting=false}
 }
 function logout(){token=null;currentUser=null;localStorage.removeItem('yeeyoo_token');showAuth();document.getElementById('authEmail').value='';document.getElementById('authPass').value=''}
@@ -1074,13 +1082,13 @@ function renderProjSel(){const s=document.getElementById('projSel');s.innerHTML=
 function switchProject(id){currentProjectId=id}
 function renderProjList(){
   const el=document.getElementById('projList');if(!el)return
-  el.innerHTML=projects.map(p=>`<div class="proj-row"><div class="proj-color" style="background:${p.color}"></div><div style="flex:1"><div class="proj-name">${p.name}</div><div class="proj-aud">${p.audience||'—'}</div></div><button class="rbtn del" onclick="delProj('${p.id}')">Slett</button></div>`).join('')
+  el.innerHTML=projects.map(p=>`<div class="proj-row"><div class="proj-color" style="background:${p.color}"></div><div style="flex:1"><div class="proj-name">${p.name}</div><div class="proj-aud">${p.audience||'—'}</div></div><button class="rbtn del" onclick="delProj('${p.id}')">${L('delete')}</button></div>`).join('')
 }
 async function generate(){
   const plats=getPlats();if(!plats.length){toast('Velg minst én plattform','err');return}
   const aiModels=getAIModels()
   const btn=document.getElementById('genBtn'),led=document.getElementById('led'),area=document.getElementById('resultsArea')
-  btn.disabled=true;btn.innerHTML='<span class="spin"></span> Genererer...';led.className='led busy';document.getElementById('ledTxt').textContent='Jobber...'
+  btn.disabled=true;btn.innerHTML='<span class="spin"></span> '+L('generating');led.className='led busy';document.getElementById('ledTxt').textContent=L('working')
 
   // Show per-model loading indicators
   const aiColors={claude:'#c96442',gpt4o:'#10a37f',gemini:'#4285f4',grok:'#aaaaaa',deepseek:'#5e6ad2'}
@@ -1108,7 +1116,7 @@ async function generate(){
     if(r.errors?.length)toast(`${r.errors.length} feil`,'err');else toast(`${r.posts.length} innlegg generert ✓`,'ok')
     updateBadge()
   }catch(e){toast(e.message,'err');area.innerHTML=`<div class="empty-state"><div class="es-icon">⚠️</div><div class="es-text">${esc(e.message)}</div></div>`}
-  finally{btn.disabled=false;btn.textContent='▶ Generer';led.className='led ok';document.getElementById('ledTxt').textContent='Klar';setTimeout(()=>{led.className='led'},3000)}
+  finally{btn.disabled=false;btn.textContent=L('generateBtn');led.className='led ok';document.getElementById('ledTxt').textContent=L('ready');setTimeout(()=>{led.className='led'},3000)}
 }
 
 async function genImage(postId){
@@ -1394,6 +1402,24 @@ const APP_I18N={
     companyName:'Bedriftsnavn',aboutCompany:'Kort om bedriften',targetAudience:'Målgruppe',
     createProject:'Opprett prosjekt →',allDone:'Alt klart!',allDoneSub:'Prosjektet er opprettet. Velg en innholdstype og klikk Generer for å lage ditt første innlegg.',
     startGenerating:'Start å generere ⚡',
+    // Auth
+    authName:'Navn',authEmail:'E-post',authPassword:'Passord',authLogin:'Logg inn →',authRegister:'Registrer deg →',
+    authNoAccount:'Ingen konto?',authHasAccount:'Har du konto?',authRegisterLink:'Registrer deg',authLoginLink:'Logg inn',
+    authOr:'ELLER',authVipps:'Logg inn med Vipps',authGoogle:'Sign in with Google',
+    authLoggingIn:'Logger inn...',authRegistering:'Registrerer...',
+    // Generate
+    emptyTitle:'Velg innholdstype og klikk Generer',emptySub:'AI lager innhold tilpasset hver plattform',
+    queueEmpty:'Ingen poster',queueEmptySub:'Generer innhold for å komme i gang',
+    // Stats
+    totalGeneratedLabel:'Totalt generert',pendingLabel:'Venter godkjenning',approvedLabel:'Godkjent',publishedLabel:'Publisert',
+    // Settings
+    save:'Lagre',delete:'Slett',
+    // Project form
+    newProjectTitle:'Nytt prosjekt',projName:'Navn',projAbout:'Om bedriften',projAudience:'Målgruppe',projTone:'Tone',projKeywords:'Nøkkelord',projColor:'Farge',
+    // General
+    back:'← Tilbake',next:'Neste →',
+    emailVerified:'E-post bekreftet ✓ Velkommen!',
+    week:'Uke',month:'Måned',
   },
   en:{
     generate:'⚡ Generate',queue:'📋 Queue',calendar:'📅 Calendar',stats:'📊 Statistics',settings:'⚙ Settings',
@@ -1423,6 +1449,18 @@ const APP_I18N={
     companyName:'Company name',aboutCompany:'About the company',targetAudience:'Target audience',
     createProject:'Create project →',allDone:'All set!',allDoneSub:'Your project is created. Choose a content type and click Generate to create your first post.',
     startGenerating:'Start generating ⚡',
+    authName:'Name',authEmail:'Email',authPassword:'Password',authLogin:'Log in →',authRegister:'Sign up →',
+    authNoAccount:'No account?',authHasAccount:'Have an account?',authRegisterLink:'Sign up',authLoginLink:'Log in',
+    authOr:'OR',authVipps:'Log in with Vipps',authGoogle:'Sign in with Google',
+    authLoggingIn:'Logging in...',authRegistering:'Signing up...',
+    emptyTitle:'Choose content type and click Generate',emptySub:'AI creates content tailored to each platform',
+    queueEmpty:'No posts',queueEmptySub:'Generate content to get started',
+    totalGeneratedLabel:'Total generated',pendingLabel:'Awaiting approval',approvedLabel:'Approved',publishedLabel:'Published',
+    save:'Save',delete:'Delete',
+    newProjectTitle:'New project',projName:'Name',projAbout:'About the company',projAudience:'Target audience',projTone:'Tone',projKeywords:'Keywords',projColor:'Color',
+    back:'← Back',next:'Next →',
+    emailVerified:'Email verified ✓ Welcome!',
+    week:'Week',month:'Month',
   },
   es:{
     generate:'⚡ Generar',queue:'📋 Cola',calendar:'📅 Calendario',stats:'📊 Estadísticas',settings:'⚙ Ajustes',
@@ -1452,6 +1490,18 @@ const APP_I18N={
     companyName:'Nombre de la empresa',aboutCompany:'Sobre la empresa',targetAudience:'Público objetivo',
     createProject:'Crear proyecto →',allDone:'¡Todo listo!',allDoneSub:'Tu proyecto está creado. Elige un tipo de contenido y haz clic en Generar.',
     startGenerating:'Empezar a generar ⚡',
+    authName:'Nombre',authEmail:'Correo electrónico',authPassword:'Contraseña',authLogin:'Iniciar sesión →',authRegister:'Registrarse →',
+    authNoAccount:'¿Sin cuenta?',authHasAccount:'¿Ya tienes cuenta?',authRegisterLink:'Regístrate',authLoginLink:'Iniciar sesión',
+    authOr:'O',authVipps:'Iniciar sesión con Vipps',authGoogle:'Iniciar sesión con Google',
+    authLoggingIn:'Iniciando sesión...',authRegistering:'Registrando...',
+    emptyTitle:'Elige tipo de contenido y haz clic en Generar',emptySub:'La IA crea contenido adaptado a cada plataforma',
+    queueEmpty:'Sin publicaciones',queueEmptySub:'Genera contenido para empezar',
+    totalGeneratedLabel:'Total generado',pendingLabel:'Esperando aprobación',approvedLabel:'Aprobado',publishedLabel:'Publicado',
+    save:'Guardar',delete:'Eliminar',
+    newProjectTitle:'Nuevo proyecto',projName:'Nombre',projAbout:'Sobre la empresa',projAudience:'Público objetivo',projTone:'Tono',projKeywords:'Palabras clave',projColor:'Color',
+    back:'← Atrás',next:'Siguiente →',
+    emailVerified:'¡Correo verificado ✓ Bienvenido!',
+    week:'Semana',month:'Mes',
   },
   pt:{
     generate:'⚡ Gerar',queue:'📋 Fila',calendar:'📅 Calendário',stats:'📊 Estatísticas',settings:'⚙ Configurações',
@@ -1481,78 +1531,165 @@ const APP_I18N={
     companyName:'Nome da empresa',aboutCompany:'Sobre a empresa',targetAudience:'Público-alvo',
     createProject:'Criar projeto →',allDone:'Tudo pronto!',allDoneSub:'Seu projeto foi criado. Escolha um tipo de conteúdo e clique em Gerar.',
     startGenerating:'Começar a gerar ⚡',
+    authName:'Nome',authEmail:'E-mail',authPassword:'Senha',authLogin:'Entrar →',authRegister:'Cadastrar →',
+    authNoAccount:'Sem conta?',authHasAccount:'Já tem conta?',authRegisterLink:'Cadastre-se',authLoginLink:'Entrar',
+    authOr:'OU',authVipps:'Entrar com Vipps',authGoogle:'Entrar com Google',
+    authLoggingIn:'Entrando...',authRegistering:'Cadastrando...',
+    emptyTitle:'Escolha o tipo de conteúdo e clique em Gerar',emptySub:'IA cria conteúdo adaptado a cada plataforma',
+    queueEmpty:'Sem publicações',queueEmptySub:'Gere conteúdo para começar',
+    totalGeneratedLabel:'Total gerado',pendingLabel:'Aguardando aprovação',approvedLabel:'Aprovado',publishedLabel:'Publicado',
+    save:'Salvar',delete:'Excluir',
+    newProjectTitle:'Novo projeto',projName:'Nome',projAbout:'Sobre a empresa',projAudience:'Público-alvo',projTone:'Tom',projKeywords:'Palavras-chave',projColor:'Cor',
+    back:'← Voltar',next:'Próximo →',
+    emailVerified:'E-mail verificado ✓ Bem-vindo!',
+    week:'Semana',month:'Mês',
   }
 }
 function L(key){return APP_I18N[appLang]?.[key]||APP_I18N.no[key]||key}
 function roleLabel(r){return{editor:L('roleEditor'),viewer:L('roleViewer'),admin:L('roleAdmin')}[r]||r}
 function statusLabel(s){return{pending:L('statusPending'),active:L('statusActive')}[s]||s}
 
-const APP_LANGS=['no','en','es','pt']
 const APP_LANG_LABELS={no:'🇳🇴 NO',en:'🇬🇧 EN',es:'🇪🇸 ES',pt:'🇧🇷 PT'}
-function toggleAppLang(){
-  const idx=APP_LANGS.indexOf(appLang)
-  appLang=APP_LANGS[(idx+1)%APP_LANGS.length]
+function setAppLang(lang){
+  appLang=lang
   localStorage.setItem('yeeyoo_lang',appLang)
   document.getElementById('appLangBtn').textContent=APP_LANG_LABELS[appLang]
+  document.getElementById('langDrop').classList.remove('open')
+  document.getElementById('langDrop').style.display='none'
   applyAppLang()
 }
+// Close dropdown on outside click
+document.addEventListener('click',e=>{if(!e.target.closest('#appLangBtn')&&!e.target.closest('#langDrop')){const d=document.getElementById('langDrop');if(d)d.style.display='none'}})
+// Toggle dropdown
+const origClick=document.getElementById('appLangBtn')?.onclick
+document.addEventListener('DOMContentLoaded',()=>{
+  const btn=document.getElementById('appLangBtn')
+  if(btn)btn.onclick=()=>{const d=document.getElementById('langDrop');d.style.display=d.style.display==='none'?'block':'none'}
+})
 function applyAppLang(){
-  // Update tab labels
+  // ── Tabs ──
   const tabs=document.querySelectorAll('.tb-tab')
   const tabKeys=['generate','queue','calendar','stats','settings']
   tabs.forEach((t,i)=>{if(tabKeys[i])t.innerHTML=L(tabKeys[i])+(i===1?` <span class="badge-count" id="queueBadge" style="display:none">0</span>`:'')})
 
-  // Update sidebar titles
+  // ── Sidebar titles ──
   document.querySelectorAll('.sb-title').forEach((el,i)=>{
     const keys=['contentType','platforms','aiModels','industryTemplates']
     if(keys[i])el.textContent=L(keys[i])
   })
 
-  // Update buttons
+  // ── Generate button ──
   const genBtn=document.getElementById('genBtn')
   if(genBtn&&!genBtn.disabled)genBtn.textContent=L('generateBtn')
 
-  // Update queue filter buttons
+  // ── Empty state ──
+  const esText=document.querySelector('#resultsArea .es-text')
+  const esSub=document.querySelector('#resultsArea .es-sub')
+  if(esText)esText.textContent=L('emptyTitle')
+  if(esSub)esSub.textContent=L('emptySub')
+
+  // ── Queue filters ──
   document.querySelectorAll('.qf').forEach(b=>{
     const map={all:'all',pending:'pending',approved:'approved',scheduled:'scheduled',published:'published'}
     const f=b.dataset.f;if(f&&map[f])b.textContent=L(map[f])
   })
 
-  // Update schedule modal
+  // ── Queue empty state ──
+  const qEmpty=document.querySelector('#queueList .es-text')
+  const qSub=document.querySelector('#queueList .es-sub')
+  if(qEmpty)qEmpty.textContent=L('queueEmpty')
+  if(qSub)qSub.textContent=L('queueEmptySub')
+
+  // ── Stats labels ──
+  const statLabels=document.querySelectorAll('.stat-lbl')
+  const statKeys=['totalGeneratedLabel','pendingLabel','approvedLabel','publishedLabel']
+  statLabels.forEach((el,i)=>{if(statKeys[i])el.textContent=L(statKeys[i])})
+
+  // ── Schedule modal ──
   const schedTitle=document.querySelector('.modal-title')
   if(schedTitle)schedTitle.textContent=L('scheduleTitle')
 
-  // Update settings titles
-  document.querySelectorAll('.sc-title').forEach(el=>{
-    if(el.textContent.match(/Abonnement|Subscription|Suscripción|Assinatura/))el.textContent=L('subscription')
-    if(el.textContent.match(/^Team$|^Equipo$|^Equipe$/))el.textContent=L('team')
-    if(el.textContent.match(/Eksporter|Export|Exportar/))el.textContent=L('exportContent')
-    if(el.textContent.match(/Prosjekter|Projects|Proyectos|Projetos/))el.textContent=L('projects')
-  })
+  // ── Settings titles ──
+  const scTitles=document.querySelectorAll('.sc-title')
+  const scKeys=['subscription','team','exportContent','projects']
+  scTitles.forEach((el,i)=>{if(scKeys[i])el.textContent=L(scKeys[i])})
 
-  // Update analytics titles
+  // ── Settings fields ──
+  const exportDesc=document.querySelector('.settings-card p[style]')
+
+  // ── Analytics titles ──
   document.querySelectorAll('.analytics-title').forEach((el,i)=>{
     const keys=['perPlatform','perModel','perProject','last30']
     if(keys[i])el.textContent=L(keys[i])
   })
 
-  // Calendar nav
-  const prev=document.querySelector('.cal-nav');if(prev)prev.textContent=L('prevMonth')
-  const navs=document.querySelectorAll('.cal-nav');if(navs[1])navs[1].textContent=L('nextMonth')
+  // ── Calendar ──
+  const calNavs=document.querySelectorAll('.cal-nav')
+  if(calNavs[0])calNavs[0].textContent=L('prevMonth')
+  if(calNavs[1])calNavs[1].textContent=L('nextMonth')
+  document.querySelectorAll('.cal-view-btn').forEach(b=>{
+    if(b.dataset.cv==='week')b.textContent=L('week')
+    if(b.dataset.cv==='month')b.textContent=L('month')
+  })
 
-  // Notification header
+  // ── Notification header ──
   const nh=document.querySelector('.notif-header span')
   if(nh)nh.textContent=L('notifications')
 
-  // Project label
+  // ── Project label ──
   const pl=document.querySelector('.tb-proj-label')
   if(pl)pl.textContent=L('project')
+
+  // ── Auth form (if visible) ──
+  const authLabels=document.querySelectorAll('.auth-label')
+  if(authLabels[0])authLabels[0].textContent=L('authName')
+  if(authLabels[1])authLabels[1].textContent=L('authEmail')
+  if(authLabels[2])authLabels[2].textContent=L('authPassword')
+  const authBtn=document.getElementById('authBtn')
+  if(authBtn&&!authBtn.querySelector('.spin')){
+    authBtn.textContent=authMode==='register'?L('authRegister'):L('authLogin')
+  }
+  const authToggle=document.getElementById('authToggle')
+  if(authToggle){
+    authToggle.innerHTML=authMode==='register'
+      ?`${L('authHasAccount')} <span>${L('authLoginLink')}</span>`
+      :`${L('authNoAccount')} <span>${L('authRegisterLink')}</span>`
+  }
+  const vippsBtn=document.getElementById('vippsBtn')
+  if(vippsBtn)vippsBtn.textContent=L('authVipps')
+
+  // ── Onboarding ──
+  const obTitle1=document.querySelector('#ob-step-1 .onboard-title')
+  const obSub1=document.querySelector('#ob-step-1 .onboard-sub')
+  if(obTitle1)obTitle1.textContent=L('welcome')
+  if(obSub1)obSub1.textContent=L('welcomeSub')
+  const obTitle2=document.querySelector('#ob-step-2 .onboard-title')
+  const obSub2=document.querySelector('#ob-step-2 .onboard-sub')
+  if(obTitle2)obTitle2.textContent=L('createFirstProject')
+  if(obSub2)obSub2.textContent=L('createProjectSub')
+  const obTitle3=document.querySelector('#ob-step-3 .onboard-title')
+  const obSub3=document.querySelector('#ob-step-3 .onboard-sub')
+  if(obTitle3)obTitle3.textContent=L('allDone')
+  if(obSub3)obSub3.textContent=L('allDoneSub')
+
+  // ── New project form labels ──
+  const npfTitle=document.querySelector('.npf-title')
+  if(npfTitle)npfTitle.textContent=L('newProjectTitle')
+
+  // ── Schedule modal buttons ──
+  const schedBtns=document.querySelectorAll('.modal-box .btn-pri, .modal-box .btn-sec')
+  if(schedBtns[0])schedBtns[0].textContent=L('scheduleSave')
+  if(schedBtns[1])schedBtns[1].textContent=L('cancel')
+
+  // ── LED status ──
+  const ledTxt=document.getElementById('ledTxt')
+  if(ledTxt&&ledTxt.textContent!==L('working'))ledTxt.textContent=L('ready')
 
   updateBadge()
 }
 
 // Apply saved language on load
-document.getElementById('appLangBtn').textContent=APP_LANG_LABELS[appLang]||'🇳🇴 NO'
+const _lb=document.getElementById('appLangBtn');if(_lb)_lb.textContent=APP_LANG_LABELS[appLang]||'🇳🇴 NO'
 
 // ─── ONBOARDING ───────────────────────────────────────────────────────────────
 async function checkOnboarding(){
