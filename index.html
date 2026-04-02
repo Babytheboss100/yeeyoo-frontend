@@ -1038,6 +1038,13 @@ async function showApp(){
   document.getElementById('userAvatar').textContent=n[0].toUpperCase()
   await loadTemplates();await loadProjects();await loadStats()
   loadIndustryTemplates();loadNotifications();checkOnboarding();applyAppLang()
+
+  // Auto-checkout if ?plan= is in URL (from landing page pricing)
+  const planParam=new URLSearchParams(window.location.search).get('plan')
+  if(planParam&&['starter','vekst','bedrift'].includes(planParam)){
+    window.history.replaceState({},'',window.location.pathname)
+    setTimeout(()=>checkout(planParam),1000)
+  }
 }
 function showTab(name){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'))
