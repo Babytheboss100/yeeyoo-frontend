@@ -1423,16 +1423,77 @@ const APP_I18N={
     companyName:'Company name',aboutCompany:'About the company',targetAudience:'Target audience',
     createProject:'Create project →',allDone:'All set!',allDoneSub:'Your project is created. Choose a content type and click Generate to create your first post.',
     startGenerating:'Start generating ⚡',
+  },
+  es:{
+    generate:'⚡ Generar',queue:'📋 Cola',calendar:'📅 Calendario',stats:'📊 Estadísticas',settings:'⚙ Ajustes',
+    project:'Proyecto',ready:'Listo',working:'Trabajando...',
+    contentType:'Tipo de contenido',platforms:'Plataformas',aiModels:'Modelos IA',industryTemplates:'Plantillas de industria',
+    selectOneOrMore:'Selecciona uno o más — resultados lado a lado',
+    generateBtn:'▶ Generar',generating:'Generando...',
+    extraCtxPlaceholder:'Contexto adicional (opcional)...',
+    all:'Todos',pending:'Pendiente',approved:'Aprobado',scheduled:'Programado',published:'Publicado',
+    overview:'Resumen',totalGenerated:'Total generado',awaitingApproval:'Esperando aprobación',
+    approve:'✓ Aprobar',schedule:'📅 Programar',copyText:'📋 Copiar texto',generateImage:'🖼 Generar imagen',regenerate:'↻ Regenerar',
+    subscription:'Suscripción',team:'Equipo',exportContent:'Exportar contenido',projects:'Proyectos',
+    usedThisMonth:'Usado este mes',monthlyLimit:'Límite mensual',
+    inviteEmail:'correo@miembro.com',invite:'Invitar',
+    downloadCsv:'📥 Descargar CSV',downloadDesc:'Descarga todo tu contenido como archivo CSV.',
+    noTeam:'Sin miembros de equipo aún.',newProject:'+ Nuevo proyecto',
+    notifications:'Notificaciones',readAll:'Leer todo',noNotifications:'Sin notificaciones aún',
+    scheduleTitle:'📅 Programar publicación',date:'Fecha',time:'Hora',scheduleSave:'📅 Programar',cancel:'Cancelar',
+    prevMonth:'← Anterior',nextMonth:'Siguiente →',
+    perPlatform:'Por plataforma',perModel:'Por modelo IA',perProject:'Por proyecto',last30:'Últimos 30 días',
+    noData:'Sin datos',
+    roleEditor:'Editor',roleViewer:'Aprobador',roleAdmin:'Administrador',
+    statusPending:'Pendiente',statusActive:'Activo',
+    welcome:'¡Bienvenido a Yeeyoo!',welcomeSub:'Configuremos tu agente de marketing IA en menos de 2 minutos.',
+    letsStart:'Empecemos →',createFirstProject:'Crea tu primer proyecto',
+    createProjectSub:'Describe tu empresa — la IA adapta todo el contenido a esto.',
+    companyName:'Nombre de la empresa',aboutCompany:'Sobre la empresa',targetAudience:'Público objetivo',
+    createProject:'Crear proyecto →',allDone:'¡Todo listo!',allDoneSub:'Tu proyecto está creado. Elige un tipo de contenido y haz clic en Generar.',
+    startGenerating:'Empezar a generar ⚡',
+  },
+  pt:{
+    generate:'⚡ Gerar',queue:'📋 Fila',calendar:'📅 Calendário',stats:'📊 Estatísticas',settings:'⚙ Configurações',
+    project:'Projeto',ready:'Pronto',working:'Trabalhando...',
+    contentType:'Tipo de conteúdo',platforms:'Plataformas',aiModels:'Modelos IA',industryTemplates:'Modelos de indústria',
+    selectOneOrMore:'Selecione um ou mais — resultados lado a lado',
+    generateBtn:'▶ Gerar',generating:'Gerando...',
+    extraCtxPlaceholder:'Contexto adicional (opcional)...',
+    all:'Todos',pending:'Pendente',approved:'Aprovado',scheduled:'Agendado',published:'Publicado',
+    overview:'Visão geral',totalGenerated:'Total gerado',awaitingApproval:'Aguardando aprovação',
+    approve:'✓ Aprovar',schedule:'📅 Agendar',copyText:'📋 Copiar texto',generateImage:'🖼 Gerar imagem',regenerate:'↻ Regenerar',
+    subscription:'Assinatura',team:'Equipe',exportContent:'Exportar conteúdo',projects:'Projetos',
+    usedThisMonth:'Usado este mês',monthlyLimit:'Limite mensal',
+    inviteEmail:'email@membro.com',invite:'Convidar',
+    downloadCsv:'📥 Baixar CSV',downloadDesc:'Baixe todo o seu conteúdo como arquivo CSV.',
+    noTeam:'Sem membros na equipe ainda.',newProject:'+ Novo projeto',
+    notifications:'Notificações',readAll:'Ler tudo',noNotifications:'Sem notificações ainda',
+    scheduleTitle:'📅 Agendar publicação',date:'Data',time:'Hora',scheduleSave:'📅 Agendar',cancel:'Cancelar',
+    prevMonth:'← Anterior',nextMonth:'Próximo →',
+    perPlatform:'Por plataforma',perModel:'Por modelo IA',perProject:'Por projeto',last30:'Últimos 30 dias',
+    noData:'Sem dados',
+    roleEditor:'Editor',roleViewer:'Aprovador',roleAdmin:'Administrador',
+    statusPending:'Pendente',statusActive:'Ativo',
+    welcome:'Bem-vindo ao Yeeyoo!',welcomeSub:'Vamos configurar seu agente de marketing IA em menos de 2 minutos.',
+    letsStart:'Vamos começar →',createFirstProject:'Crie seu primeiro projeto',
+    createProjectSub:'Descreva sua empresa — a IA adapta todo o conteúdo a isso.',
+    companyName:'Nome da empresa',aboutCompany:'Sobre a empresa',targetAudience:'Público-alvo',
+    createProject:'Criar projeto →',allDone:'Tudo pronto!',allDoneSub:'Seu projeto foi criado. Escolha um tipo de conteúdo e clique em Gerar.',
+    startGenerating:'Começar a gerar ⚡',
   }
 }
 function L(key){return APP_I18N[appLang]?.[key]||APP_I18N.no[key]||key}
 function roleLabel(r){return{editor:L('roleEditor'),viewer:L('roleViewer'),admin:L('roleAdmin')}[r]||r}
 function statusLabel(s){return{pending:L('statusPending'),active:L('statusActive')}[s]||s}
 
+const APP_LANGS=['no','en','es','pt']
+const APP_LANG_LABELS={no:'🇳🇴 NO',en:'🇬🇧 EN',es:'🇪🇸 ES',pt:'🇧🇷 PT'}
 function toggleAppLang(){
-  appLang=appLang==='no'?'en':'no'
+  const idx=APP_LANGS.indexOf(appLang)
+  appLang=APP_LANGS[(idx+1)%APP_LANGS.length]
   localStorage.setItem('yeeyoo_lang',appLang)
-  document.getElementById('appLangBtn').textContent=appLang==='no'?'EN':'NO'
+  document.getElementById('appLangBtn').textContent=APP_LANG_LABELS[appLang]
   applyAppLang()
 }
 function applyAppLang(){
@@ -1463,10 +1524,10 @@ function applyAppLang(){
 
   // Update settings titles
   document.querySelectorAll('.sc-title').forEach(el=>{
-    if(el.textContent.match(/Abonnement|Subscription/))el.textContent=L('subscription')
-    if(el.textContent.match(/Team/))el.textContent=L('team')
-    if(el.textContent.match(/Eksporter|Export/))el.textContent=L('exportContent')
-    if(el.textContent.match(/Prosjekter|Projects/))el.textContent=L('projects')
+    if(el.textContent.match(/Abonnement|Subscription|Suscripción|Assinatura/))el.textContent=L('subscription')
+    if(el.textContent.match(/^Team$|^Equipo$|^Equipe$/))el.textContent=L('team')
+    if(el.textContent.match(/Eksporter|Export|Exportar/))el.textContent=L('exportContent')
+    if(el.textContent.match(/Prosjekter|Projects|Proyectos|Projetos/))el.textContent=L('projects')
   })
 
   // Update analytics titles
@@ -1490,8 +1551,8 @@ function applyAppLang(){
   updateBadge()
 }
 
-// Apply on load
-if(appLang==='en')document.getElementById('appLangBtn').textContent='NO'
+// Apply saved language on load
+document.getElementById('appLangBtn').textContent=APP_LANG_LABELS[appLang]||'🇳🇴 NO'
 
 // ─── ONBOARDING ───────────────────────────────────────────────────────────────
 async function checkOnboarding(){
