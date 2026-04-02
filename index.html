@@ -936,15 +936,26 @@ let projects=[],currentProjectId=null,selectedTemplate='customer_acquisition'
 let templates=[],queuePosts=[],currentFilter='all',selectedColor='#4f7fff'
 let authMode='login'
 
+let pendingPlan=null // saved from ?plan= param for after login
+
 window.onload=async()=>{
-  // Check for OAuth callback params in URL
+  // Check for URL params
   const params=new URLSearchParams(window.location.search)
   const oauthToken=params.get('oauth_token')
   const verified=params.get('verified')
   const oauthError=params.get('error')
+  const planFromUrl=params.get('plan')
 
-  // Always clean URL params first to prevent re-triggering on refresh
-  if(oauthToken||verified||oauthError){
+  // Save plan param before cleaning URL (persists through login flow)
+  if(planFromUrl&&['starter','vekst','bedrift'].includes(planFromUrl)){
+    pendingPlan=planFromUrl
+    sessionStorage.setItem('yeeyoo_pending_plan',planFromUrl)
+  }else{
+    pendingPlan=sessionStorage.getItem('yeeyoo_pending_plan')
+  }
+
+  // Clean URL params
+  if(oauthToken||verified||oauthError||planFromUrl){
     window.history.replaceState({},'',window.location.pathname)
   }
 
@@ -1039,11 +1050,13 @@ async function showApp(){
   await loadTemplates();await loadProjects();await loadStats()
   loadIndustryTemplates();loadNotifications();checkOnboarding();applyAppLang()
 
-  // Auto-checkout if ?plan= is in URL (from landing page pricing)
-  const planParam=new URLSearchParams(window.location.search).get('plan')
-  if(planParam&&['starter','vekst','bedrift'].includes(planParam)){
-    window.history.replaceState({},'',window.location.pathname)
-    setTimeout(()=>checkout(planParam),1000)
+  // Auto-checkout if plan was selected on landing page
+  if(pendingPlan){
+    const plan=pendingPlan
+    pendingPlan=null
+    sessionStorage.removeItem('yeeyoo_pending_plan')
+    toast('Sender til betaling...','info')
+    setTimeout(()=>checkout(plan),1500)
   }
 }
 function showTab(name){
