@@ -932,8 +932,6 @@ let templates=[],queuePosts=[],currentFilter='all',selectedColor='#4f7fff'
 let authMode='login'
 
 window.onload=async()=>{
-  console.log('[auth] onload start, token:', token ? 'EXISTS' : 'NULL')
-
   // Check for OAuth callback params in URL
   const params=new URLSearchParams(window.location.search)
   const oauthToken=params.get('oauth_token')
@@ -946,7 +944,6 @@ window.onload=async()=>{
   }
 
   if(oauthToken){
-    console.log('[auth] OAuth token found in URL')
     token=oauthToken;localStorage.setItem('yeeyoo_token',token)
   }
   if(verified==='true'){
@@ -957,20 +954,13 @@ window.onload=async()=>{
   }
 
   if(token){
-    console.log('[auth] Token exists, calling /auth/me...')
     try{
       const me=await req('/auth/me')
-      if(me.id){
-        console.log('[auth] Valid session, showing app for:', me.email)
-        currentUser=me;showApp();return
-      }
-    }catch(e){
-      console.log('[auth] Token invalid, clearing:', e.message)
+      if(me.id){currentUser=me;showApp();return}
+    }catch{
       token=null;localStorage.removeItem('yeeyoo_token')
     }
   }
-
-  console.log('[auth] No valid session, showing login')
   showAuth()
 
   // Show Vipps button for Norwegian users
