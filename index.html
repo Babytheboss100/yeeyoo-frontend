@@ -625,15 +625,12 @@ body::after{
       <div class="tb-tab" onclick="showTab('settings')" data-tab="settings">⚙ Innstillinger</div>
     </div>
     <div class="tb-right">
-      <div style="position:relative">
-        <button id="appLangBtn" onclick="document.getElementById('langDrop').classList.toggle('open')" style="padding:4px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--card);color:var(--white);font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer">🇳🇴 NO</button>
-        <div id="langDrop" style="display:none;position:absolute;top:100%;right:0;margin-top:4px;background:var(--navy3);border:1px solid var(--border2);border-radius:8px;overflow:hidden;z-index:200;min-width:110px;box-shadow:0 10px 30px rgba(0,0,0,.5)">
-          <div onclick="setAppLang('no')" style="padding:8px 14px;cursor:pointer;font-size:12px;font-weight:600;transition:background .15s" onmouseover="this.style.background='var(--card2)'" onmouseout="this.style.background='transparent'">🇳🇴 Norsk</div>
-          <div onclick="setAppLang('en')" style="padding:8px 14px;cursor:pointer;font-size:12px;font-weight:600;transition:background .15s" onmouseover="this.style.background='var(--card2)'" onmouseout="this.style.background='transparent'">🇬🇧 English</div>
-          <div onclick="setAppLang('es')" style="padding:8px 14px;cursor:pointer;font-size:12px;font-weight:600;transition:background .15s" onmouseover="this.style.background='var(--card2)'" onmouseout="this.style.background='transparent'">🇪🇸 Español</div>
-          <div onclick="setAppLang('pt')" style="padding:8px 14px;cursor:pointer;font-size:12px;font-weight:600;transition:background .15s" onmouseover="this.style.background='var(--card2)'" onmouseout="this.style.background='transparent'">🇧🇷 Português</div>
-        </div>
-      </div>
+      <select id="appLangSel" onchange="setAppLang(this.value)" style="padding:5px 8px;border:1px solid var(--border2);border-radius:6px;background:var(--navy3);color:var(--white);font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;outline:none">
+        <option value="no">🇳🇴 Norsk</option>
+        <option value="en">🇬🇧 English</option>
+        <option value="es">🇪🇸 Español</option>
+        <option value="pt">🇧🇷 Português</option>
+      </select>
       <div class="notif-bell" onclick="toggleNotifPanel()">
         🔔<span class="notif-badge" id="notifBadge" style="display:none">0</span>
         <div class="notif-panel" id="notifPanel">
@@ -1338,10 +1335,14 @@ async function loadBilling() {
 
 async function checkout(planId) {
   try {
-    toast('Sender til betaling...', 'info')
+    toast(L('working'),'info')
     const r = await req('/billing/checkout', { method:'POST', body:JSON.stringify({ planId }) })
     if (r.url) window.location.href = r.url
-  } catch(e) { toast(e.message, 'err') }
+    else toast('Stripe er ikke konfigurert. Kontakt support.','err')
+  } catch(e) {
+    if(e.message.includes('Ugyldig plan'))toast('Stripe-planer er ikke konfigurert ennå. Sett STRIPE_PRICE_* env vars på Render.','err')
+    else toast(e.message,'err')
+  }
 }
 
 async function openPortal() {
@@ -1549,23 +1550,13 @@ function L(key){return APP_I18N[appLang]?.[key]||APP_I18N.no[key]||key}
 function roleLabel(r){return{editor:L('roleEditor'),viewer:L('roleViewer'),admin:L('roleAdmin')}[r]||r}
 function statusLabel(s){return{pending:L('statusPending'),active:L('statusActive')}[s]||s}
 
-const APP_LANG_LABELS={no:'🇳🇴 NO',en:'🇬🇧 EN',es:'🇪🇸 ES',pt:'🇧🇷 PT'}
 function setAppLang(lang){
   appLang=lang
   localStorage.setItem('yeeyoo_lang',appLang)
-  document.getElementById('appLangBtn').textContent=APP_LANG_LABELS[appLang]
-  document.getElementById('langDrop').classList.remove('open')
-  document.getElementById('langDrop').style.display='none'
+  const sel=document.getElementById('appLangSel')
+  if(sel)sel.value=appLang
   applyAppLang()
 }
-// Close dropdown on outside click
-document.addEventListener('click',e=>{if(!e.target.closest('#appLangBtn')&&!e.target.closest('#langDrop')){const d=document.getElementById('langDrop');if(d)d.style.display='none'}})
-// Toggle dropdown
-const origClick=document.getElementById('appLangBtn')?.onclick
-document.addEventListener('DOMContentLoaded',()=>{
-  const btn=document.getElementById('appLangBtn')
-  if(btn)btn.onclick=()=>{const d=document.getElementById('langDrop');d.style.display=d.style.display==='none'?'block':'none'}
-})
 function applyAppLang(){
   // ── Tabs ──
   const tabs=document.querySelectorAll('.tb-tab')
@@ -1689,7 +1680,7 @@ function applyAppLang(){
 }
 
 // Apply saved language on load
-const _lb=document.getElementById('appLangBtn');if(_lb)_lb.textContent=APP_LANG_LABELS[appLang]||'🇳🇴 NO'
+const _ls=document.getElementById('appLangSel');if(_ls)_ls.value=appLang
 
 // ─── ONBOARDING ───────────────────────────────────────────────────────────────
 async function checkOnboarding(){
