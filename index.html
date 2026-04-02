@@ -932,7 +932,9 @@ body::after{
 
 <script>
 const API=localStorage.getItem('yeeyoo_api_url')||'https://yeeyoo-backend.onrender.com/api'
-let token=localStorage.getItem('yeeyoo_token'),currentUser=null
+// Clear old localStorage token (migrated to sessionStorage)
+localStorage.removeItem('yeeyoo_token')
+let token=sessionStorage.getItem('yeeyoo_token'),currentUser=null
 let projects=[],currentProjectId=null,selectedTemplate='customer_acquisition'
 let templates=[],queuePosts=[],currentFilter='all',selectedColor='#4f7fff'
 let authMode='login'
@@ -961,7 +963,7 @@ window.onload=async()=>{
   }
 
   if(oauthToken){
-    token=oauthToken;localStorage.setItem('yeeyoo_token',token)
+    token=oauthToken;sessionStorage.setItem('yeeyoo_token',token)
   }
   if(verified==='true'){
     setTimeout(()=>toast(L('emailVerified'),'ok'),500)
@@ -987,7 +989,7 @@ window.onload=async()=>{
       throw new Error('no user in response')
     }catch(e){
       console.log('[auth] Token cleared:',e.message)
-      token=null;localStorage.removeItem('yeeyoo_token')
+      token=null;sessionStorage.removeItem('yeeyoo_token')
     }
   }
   showAuth()
@@ -1032,7 +1034,7 @@ async function doAuth(){
       return
     }
 
-    token=d.token;currentUser=d.user;localStorage.setItem('yeeyoo_token',token);showApp()
+    token=d.token;currentUser=d.user;sessionStorage.setItem('yeeyoo_token',token);showApp()
   }catch(e){
     const errData=e.message
     // Check if it's a verification error from login
@@ -1046,7 +1048,7 @@ async function doAuth(){
     document.getElementById('authBtn').textContent=authMode==='register'?L('authRegister'):L('authLogin')
   }finally{isSubmitting=false}
 }
-function logout(){token=null;currentUser=null;localStorage.removeItem('yeeyoo_token');showAuth();document.getElementById('authEmail').value='';document.getElementById('authPass').value=''}
+function logout(){token=null;currentUser=null;sessionStorage.removeItem('yeeyoo_token');showAuth();document.getElementById('authEmail').value='';document.getElementById('authPass').value=''}
 function loginWithGoogle(){window.location.href=API+'/auth/google'}
 function loginWithVipps(){window.location.href=API+'/auth/vipps'}
 async function resendVerification(email){
