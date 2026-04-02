@@ -440,6 +440,61 @@ body::after{
 }
 .npf-title{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:16px}
 
+/* ── SEO WIZARD ── */
+.seo-wrap{max-width:800px;margin:0 auto;padding:24px}
+.seo-wizard{background:linear-gradient(145deg,rgba(12,17,48,.7),rgba(8,12,30,.7));border:1px solid var(--border2);border-radius:var(--r2);padding:32px;position:relative}
+.seo-progress{display:flex;gap:4px;margin-bottom:28px}
+.seo-progress-bar{flex:1;height:4px;border-radius:2px;background:var(--card2);transition:background .3s}
+.seo-progress-bar.done{background:linear-gradient(90deg,var(--blue),var(--purple))}
+.seo-step{display:none}.seo-step.active{display:block}
+.seo-step-num{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--purple2);text-transform:uppercase;margin-bottom:6px}
+.seo-step-title{font-size:20px;font-weight:800;color:var(--white);margin-bottom:6px}
+.seo-step-sub{font-size:13px;color:var(--muted);margin-bottom:22px}
+.seo-nav{display:flex;gap:8px;margin-top:20px}
+.seo-nav .btn-pri,.seo-nav .btn-sec{flex:1}
+
+/* SEO Results Dashboard */
+.seo-dashboard{display:none}
+.seo-dashboard.active{display:block}
+.seo-section{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:20px;margin-bottom:16px}
+.seo-section-title{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.seo-meta-box{background:rgba(45,91,227,.06);border:1px solid rgba(45,91,227,.2);border-radius:var(--r);padding:14px;margin-bottom:10px}
+.seo-meta-label{font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--blue2);text-transform:uppercase;margin-bottom:4px}
+.seo-meta-text{font-size:14px;color:var(--white);line-height:1.5}
+.seo-meta-chars{font-size:10px;color:var(--muted);margin-top:4px}
+.seo-kw-table{width:100%;border-collapse:collapse}
+.seo-kw-table th{font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;text-align:left;padding:8px 10px;border-bottom:1px solid var(--border)}
+.seo-kw-table td{font-size:13px;color:var(--white);padding:10px;border-bottom:1px solid var(--border)}
+.seo-kw-table tr:last-child td{border-bottom:none}
+.seo-kw-vol{font-weight:700;color:var(--blue2)}
+.seo-kw-diff{font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase}
+.seo-kw-diff.lav{background:rgba(74,222,128,.12);color:var(--ok)}
+.seo-kw-diff.middels{background:rgba(251,191,36,.12);color:var(--warn)}
+.seo-kw-diff.høy{background:rgba(248,113,113,.12);color:var(--hot)}
+.seo-kw-intent{font-size:10px;color:var(--muted);font-weight:600}
+.seo-blog-card{background:var(--card2);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px}
+.seo-blog-card:last-child{margin-bottom:0}
+.seo-blog-title{font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px}
+.seo-blog-kw{font-size:10px;font-weight:700;color:var(--purple2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.seo-blog-outline{font-size:12px;color:var(--muted);line-height:1.5}
+.seo-check-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.seo-check-item:last-child{border-bottom:none}
+.seo-check-box{width:18px;height:18px;border:2px solid var(--border2);border-radius:4px;cursor:pointer;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.seo-check-box.checked{background:linear-gradient(135deg,var(--blue),var(--purple));border-color:transparent}
+.seo-check-box.checked::after{content:'✓';color:#fff;font-size:11px;font-weight:800}
+.seo-check-action{font-size:13px;color:var(--white);flex:1}
+.seo-check-tags{display:flex;gap:6px;margin-top:4px}
+.seo-check-tag{font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:.5px}
+.seo-check-tag.impact-høy{background:rgba(74,222,128,.12);color:var(--ok)}
+.seo-check-tag.impact-middels{background:rgba(251,191,36,.12);color:var(--warn)}
+.seo-check-tag.impact-lav{background:rgba(248,113,113,.12);color:var(--hot)}
+.seo-check-tag.effort-lav{background:rgba(74,222,128,.08);color:var(--ok)}
+.seo-check-tag.effort-middels{background:rgba(251,191,36,.08);color:var(--warn)}
+.seo-check-tag.effort-høy{background:rgba(248,113,113,.08);color:var(--hot)}
+.seo-regen{margin-top:16px;text-align:center}
+.seo-copy-btn{padding:4px 10px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-family:var(--font);font-size:11px;font-weight:600;cursor:pointer;border-radius:4px;transition:all .15s}
+.seo-copy-btn:hover{color:var(--white);background:var(--card2)}
+
 /* ── TOAST ── */
 .toast{
   position:fixed;bottom:18px;right:18px;z-index:999;
@@ -645,6 +700,7 @@ body::after{
       <div class="tb-tab" onclick="showTab('queue')" data-tab="queue">📋 Kø <span class="badge-count" id="queueBadge" style="display:none">0</span></div>
       <div class="tb-tab" onclick="showTab('calendar')" data-tab="calendar">📅 Kalender</div>
       <div class="tb-tab" onclick="showTab('stats')" data-tab="stats">📊 Statistikk</div>
+      <div class="tb-tab" onclick="showTab('seo')" data-tab="seo">🔍 SEO</div>
       <div class="tb-tab" onclick="showTab('settings')" data-tab="settings">⚙ Innstillinger</div>
     </div>
     <div class="tb-right">
@@ -800,6 +856,124 @@ body::after{
             <div id="chartDaily"></div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- SEO -->
+    <div class="tab-panel" id="tab-seo">
+      <div class="seo-wrap">
+
+        <!-- WIZARD -->
+        <div id="seoWizard" class="seo-wizard">
+          <div class="seo-progress" id="seoProgress">
+            <div class="seo-progress-bar done"></div>
+            <div class="seo-progress-bar"></div>
+            <div class="seo-progress-bar"></div>
+            <div class="seo-progress-bar"></div>
+            <div class="seo-progress-bar"></div>
+          </div>
+
+          <div class="seo-step active" id="seo-step-1">
+            <div class="seo-step-num">Steg 1 av 5</div>
+            <div class="seo-step-title">Hva heter bedriften din og hva tilbyr dere?</div>
+            <div class="seo-step-sub">Beskriv kort hva bedriften din gjor og hvilke produkter eller tjenester dere tilbyr.</div>
+            <div class="fld"><label class="fld-label">Bedriftsnavn</label><input class="fld-input" id="seoCompanyName" placeholder="F.eks. Fjord Digital AS"></div>
+            <div class="fld"><label class="fld-label">Hva tilbyr dere?</label><textarea class="fld-ta" id="seoCompanyOffer" rows="3" placeholder="F.eks. Vi tilbyr nettsider, SEO og digital markedsføring for små og mellomstore bedrifter i Norge"></textarea></div>
+            <div class="seo-nav"><button class="btn-pri" onclick="seoNext(2)">Neste →</button></div>
+          </div>
+
+          <div class="seo-step" id="seo-step-2">
+            <div class="seo-step-num">Steg 2 av 5</div>
+            <div class="seo-step-title">Hvilken bransje er dere i?</div>
+            <div class="seo-step-sub">Velg eller skriv inn bransjen deres — dette hjelper AI-en å finne relevante sokeord.</div>
+            <div class="fld"><label class="fld-label">Bransje</label><input class="fld-input" id="seoIndustry" placeholder="F.eks. Digital markedsføring, Eiendom, Helse, Restaurant, SaaS..."></div>
+            <div class="seo-nav">
+              <button class="btn-sec" onclick="seoNext(1)">← Tilbake</button>
+              <button class="btn-pri" onclick="seoNext(3)">Neste →</button>
+            </div>
+          </div>
+
+          <div class="seo-step" id="seo-step-3">
+            <div class="seo-step-num">Steg 3 av 5</div>
+            <div class="seo-step-title">Hvilke byer eller områder vil dere nå?</div>
+            <div class="seo-step-sub">Lokale søkeord kan gi mye trafikk. La stå tomt hvis dere er landsdekkende.</div>
+            <div class="fld"><label class="fld-label">Byer / områder</label><input class="fld-input" id="seoLocations" placeholder="F.eks. Oslo, Bergen, Trondheim, hele Norge"></div>
+            <div class="seo-nav">
+              <button class="btn-sec" onclick="seoNext(2)">← Tilbake</button>
+              <button class="btn-pri" onclick="seoNext(4)">Neste →</button>
+            </div>
+          </div>
+
+          <div class="seo-step" id="seo-step-4">
+            <div class="seo-step-num">Steg 4 av 5</div>
+            <div class="seo-step-title">Hvem er deres typiske kunde?</div>
+            <div class="seo-step-sub">Jo bedre vi forstår kundene deres, desto mer treffsikre blir søkeordene.</div>
+            <div class="fld"><label class="fld-label">Typisk kunde</label><textarea class="fld-ta" id="seoTargetCustomer" rows="3" placeholder="F.eks. Norske småbedriftseiere 30-55 år som trenger hjelp med digital synlighet"></textarea></div>
+            <div class="seo-nav">
+              <button class="btn-sec" onclick="seoNext(3)">← Tilbake</button>
+              <button class="btn-pri" onclick="seoNext(5)">Neste →</button>
+            </div>
+          </div>
+
+          <div class="seo-step" id="seo-step-5">
+            <div class="seo-step-num">Steg 5 av 5</div>
+            <div class="seo-step-title">Hvem er deres største konkurrenter?</div>
+            <div class="seo-step-sub">Skriv inn nettsider eller bedriftsnavn — AI-en bruker dette for å finne uutnyttede muligheter.</div>
+            <div class="fld"><label class="fld-label">Konkurrenter</label><textarea class="fld-ta" id="seoCompetitors" rows="3" placeholder="F.eks. bedrift1.no, bedrift2.no, Konkurrent AS"></textarea></div>
+            <div class="seo-nav">
+              <button class="btn-sec" onclick="seoNext(4)">← Tilbake</button>
+              <button class="btn-pri" onclick="seoGenerate()" id="seoGenBtn">🔍 Generer SEO-profil</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- RESULTS DASHBOARD -->
+        <div id="seoDashboard" class="seo-dashboard">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+            <div>
+              <div style="font-size:20px;font-weight:800;color:var(--white)">SEO-profil</div>
+              <div style="font-size:12px;color:var(--muted)" id="seoProfileProject"></div>
+            </div>
+            <button class="btn-sec" onclick="seoShowWizard()" style="font-size:11px;padding:7px 14px">↻ Generer på nytt</button>
+          </div>
+
+          <!-- Meta tags -->
+          <div class="seo-section">
+            <div class="seo-section-title">Meta tittel &amp; beskrivelse <button class="seo-copy-btn" onclick="seoCopyMeta()">Kopier begge</button></div>
+            <div class="seo-meta-box">
+              <div class="seo-meta-label">Meta tittel</div>
+              <div class="seo-meta-text" id="seoMetaTitle"></div>
+              <div class="seo-meta-chars" id="seoMetaTitleChars"></div>
+            </div>
+            <div class="seo-meta-box">
+              <div class="seo-meta-label">Meta beskrivelse</div>
+              <div class="seo-meta-text" id="seoMetaDesc"></div>
+              <div class="seo-meta-chars" id="seoMetaDescChars"></div>
+            </div>
+          </div>
+
+          <!-- Keywords -->
+          <div class="seo-section">
+            <div class="seo-section-title">Målrettede søkeord (10)</div>
+            <table class="seo-kw-table">
+              <thead><tr><th>Søkeord</th><th>Volum/mnd</th><th>Vanskelighet</th><th>Intensjon</th></tr></thead>
+              <tbody id="seoKeywordRows"></tbody>
+            </table>
+          </div>
+
+          <!-- Blog ideas -->
+          <div class="seo-section">
+            <div class="seo-section-title">Blogginnlegg-ideer (3)</div>
+            <div id="seoBlogIdeas"></div>
+          </div>
+
+          <!-- Action checklist -->
+          <div class="seo-section">
+            <div class="seo-section-title">SEO sjekkliste — 5 quick wins</div>
+            <div id="seoChecklist"></div>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -971,12 +1145,17 @@ window.onload=async()=>{
   const oauthError=params.get('error')
   const planFromUrl=params.get('plan')
 
-  // Save plan param before cleaning URL (persists through login flow)
+  // Save plan param (uses localStorage to survive Google/Vipps OAuth redirect)
   if(planFromUrl&&['starter','vekst','bedrift'].includes(planFromUrl)){
     pendingPlan=planFromUrl
-    sessionStorage.setItem('yeeyoo_pending_plan',planFromUrl)
+    localStorage.setItem('yeeyoo_pending_plan',JSON.stringify({plan:planFromUrl,ts:Date.now()}))
   }else{
-    pendingPlan=sessionStorage.getItem('yeeyoo_pending_plan')
+    try{
+      const saved=JSON.parse(localStorage.getItem('yeeyoo_pending_plan'))
+      // Only use if saved within last 10 minutes
+      if(saved&&saved.plan&&(Date.now()-saved.ts)<600000)pendingPlan=saved.plan
+      else localStorage.removeItem('yeeyoo_pending_plan')
+    }catch{localStorage.removeItem('yeeyoo_pending_plan')}
   }
 
   // Clean URL params
@@ -1118,10 +1297,12 @@ async function showApp(){
   loadIndustryTemplates();loadNotifications();checkOnboarding();applyAppLang()
 
   // Auto-checkout if plan was selected on landing page
+  console.log('[checkout] pendingPlan:', pendingPlan)
   if(pendingPlan){
     const plan=pendingPlan
     pendingPlan=null
-    sessionStorage.removeItem('yeeyoo_pending_plan')
+    localStorage.removeItem('yeeyoo_pending_plan')
+    console.log('[checkout] Triggering Stripe for plan:', plan)
     toast('Sender til betaling...','info')
     setTimeout(()=>checkout(plan),1500)
   }
@@ -1131,7 +1312,7 @@ function showTab(name){
   document.querySelectorAll('.tb-tab').forEach(t=>t.classList.remove('active'))
   document.getElementById('tab-'+name).classList.add('active')
   document.querySelector('[data-tab="'+name+'"]').classList.add('active')
-  if(name==='queue')loadQueue();if(name==='calendar')loadCalendar();if(name==='stats'){loadStats();loadAnalytics()};if(name==='settings'){renderProjList();loadBilling();loadTeam()}
+  if(name==='queue')loadQueue();if(name==='calendar')loadCalendar();if(name==='stats'){loadStats();loadAnalytics()};if(name==='settings'){renderProjList();loadBilling();loadTeam()};if(name==='seo')loadSeoProfile()
 }
 async function loadTemplates(){try{templates=await req('/content/templates');renderTpl()}catch{}}
 function renderTpl(){
@@ -1463,7 +1644,7 @@ let tt;function toast(msg,type='info'){const el=document.getElementById('toast')
 let appLang=localStorage.getItem('yeeyoo_lang')||'no'
 const APP_I18N={
   no:{
-    generate:'⚡ Generer',queue:'📋 Kø',calendar:'📅 Kalender',stats:'📊 Statistikk',settings:'⚙ Innstillinger',
+    generate:'⚡ Generer',queue:'📋 Kø',calendar:'📅 Kalender',stats:'📊 Statistikk',seo:'🔍 SEO',settings:'⚙ Innstillinger',
     project:'Prosjekt',ready:'Klar',working:'Jobber...',
     contentType:'Innholdstype',platforms:'Plattformer',aiModels:'AI-modeller',industryTemplates:'Bransjemaler',
     selectOneOrMore:'Velg én eller flere — resultater vises side om side',
@@ -1510,7 +1691,7 @@ const APP_I18N={
     week:'Uke',month:'Måned',
   },
   en:{
-    generate:'⚡ Generate',queue:'📋 Queue',calendar:'📅 Calendar',stats:'📊 Statistics',settings:'⚙ Settings',
+    generate:'⚡ Generate',queue:'📋 Queue',calendar:'📅 Calendar',stats:'📊 Statistics',seo:'🔍 SEO',settings:'⚙ Settings',
     project:'Project',ready:'Ready',working:'Working...',
     contentType:'Content type',platforms:'Platforms',aiModels:'AI models',industryTemplates:'Industry templates',
     selectOneOrMore:'Select one or more — results shown side by side',
@@ -1551,7 +1732,7 @@ const APP_I18N={
     week:'Week',month:'Month',
   },
   es:{
-    generate:'⚡ Generar',queue:'📋 Cola',calendar:'📅 Calendario',stats:'📊 Estadísticas',settings:'⚙ Ajustes',
+    generate:'⚡ Generar',queue:'📋 Cola',calendar:'📅 Calendario',stats:'📊 Estadísticas',seo:'🔍 SEO',settings:'⚙ Ajustes',
     project:'Proyecto',ready:'Listo',working:'Trabajando...',
     contentType:'Tipo de contenido',platforms:'Plataformas',aiModels:'Modelos IA',industryTemplates:'Plantillas de industria',
     selectOneOrMore:'Selecciona uno o más — resultados lado a lado',
@@ -1592,7 +1773,7 @@ const APP_I18N={
     week:'Semana',month:'Mes',
   },
   pt:{
-    generate:'⚡ Gerar',queue:'📋 Fila',calendar:'📅 Calendário',stats:'📊 Estatísticas',settings:'⚙ Configurações',
+    generate:'⚡ Gerar',queue:'📋 Fila',calendar:'📅 Calendário',stats:'📊 Estatísticas',seo:'🔍 SEO',settings:'⚙ Configurações',
     project:'Projeto',ready:'Pronto',working:'Trabalhando...',
     contentType:'Tipo de conteúdo',platforms:'Plataformas',aiModels:'Modelos IA',industryTemplates:'Modelos de indústria',
     selectOneOrMore:'Selecione um ou mais — resultados lado a lado',
@@ -1633,6 +1814,124 @@ const APP_I18N={
     week:'Semana',month:'Mês',
   }
 }
+// ─── SEO WIZARD ──────────────────────────────────────────────────────────────
+let seoProfile=null
+function seoNext(step){
+  document.querySelectorAll('.seo-step').forEach(s=>s.classList.remove('active'))
+  document.getElementById('seo-step-'+step).classList.add('active')
+  document.querySelectorAll('.seo-progress-bar').forEach((b,i)=>b.classList.toggle('done',i<step))
+}
+function seoShowWizard(){
+  document.getElementById('seoWizard').style.display='block'
+  document.getElementById('seoDashboard').classList.remove('active')
+  seoNext(1)
+}
+async function loadSeoProfile(){
+  if(!currentProjectId)return
+  try{
+    const data=await req('/seo/'+currentProjectId)
+    if(data){
+      seoProfile=data
+      renderSeoProfile(data)
+    }
+  }catch{}
+}
+async function seoGenerate(){
+  const name=document.getElementById('seoCompanyName').value.trim()
+  const industry=document.getElementById('seoIndustry').value.trim()
+  if(!name){toast('Skriv inn bedriftsnavn','err');return}
+  if(!industry){toast('Skriv inn bransje','err');return}
+  if(!currentProjectId){toast('Velg et prosjekt først','err');return}
+
+  const btn=document.getElementById('seoGenBtn')
+  btn.disabled=true;btn.innerHTML='<span class="spin"></span> Analyserer med AI...'
+
+  try{
+    const data=await req('/seo/generate',{
+      method:'POST',
+      body:JSON.stringify({
+        projectId:currentProjectId,
+        companyName:name,
+        companyOffer:document.getElementById('seoCompanyOffer').value.trim(),
+        industry,
+        locations:document.getElementById('seoLocations').value.trim(),
+        targetCustomer:document.getElementById('seoTargetCustomer').value.trim(),
+        competitors:document.getElementById('seoCompetitors').value.trim()
+      })
+    })
+    seoProfile=data
+    renderSeoProfile(data)
+    toast('SEO-profil generert ✓','ok')
+  }catch(e){
+    toast(e.message,'err')
+  }finally{
+    btn.disabled=false;btn.textContent='🔍 Generer SEO-profil'
+  }
+}
+function renderSeoProfile(data){
+  document.getElementById('seoWizard').style.display='none'
+  document.getElementById('seoDashboard').classList.add('active')
+
+  const proj=projects.find(p=>p.id===currentProjectId)
+  document.getElementById('seoProfileProject').textContent=proj?proj.name+' — '+data.industry:data.industry
+
+  // Meta
+  document.getElementById('seoMetaTitle').textContent=data.meta_title
+  document.getElementById('seoMetaTitleChars').textContent=data.meta_title.length+'/60 tegn'
+  document.getElementById('seoMetaDesc').textContent=data.meta_description
+  document.getElementById('seoMetaDescChars').textContent=data.meta_description.length+'/155 tegn'
+
+  // Keywords
+  const kws=typeof data.keywords==='string'?JSON.parse(data.keywords):data.keywords
+  document.getElementById('seoKeywordRows').innerHTML=kws.map(k=>`
+    <tr>
+      <td style="font-weight:600">${esc(k.keyword)}</td>
+      <td class="seo-kw-vol">${k.volume?.toLocaleString('nb-NO')||'—'}</td>
+      <td><span class="seo-kw-diff ${k.difficulty}">${k.difficulty}</span></td>
+      <td><span class="seo-kw-intent">${k.intent}</span></td>
+    </tr>
+  `).join('')
+
+  // Blog ideas
+  const blogs=typeof data.blog_ideas==='string'?JSON.parse(data.blog_ideas):data.blog_ideas
+  document.getElementById('seoBlogIdeas').innerHTML=blogs.map(b=>`
+    <div class="seo-blog-card">
+      <div class="seo-blog-kw">${esc(b.targetKeyword)}</div>
+      <div class="seo-blog-title">${esc(b.title)}</div>
+      <div class="seo-blog-outline">${esc(b.outline)}</div>
+    </div>
+  `).join('')
+
+  // Action checklist
+  const checks=typeof data.action_checklist==='string'?JSON.parse(data.action_checklist):data.action_checklist
+  document.getElementById('seoChecklist').innerHTML=checks.map((c,i)=>`
+    <div class="seo-check-item">
+      <div class="seo-check-box" onclick="this.classList.toggle('checked')"></div>
+      <div>
+        <div class="seo-check-action">${esc(c.action)}</div>
+        <div class="seo-check-tags">
+          <span class="seo-check-tag impact-${c.impact}">Impact: ${c.impact}</span>
+          <span class="seo-check-tag effort-${c.effort}">Effort: ${c.effort}</span>
+        </div>
+      </div>
+    </div>
+  `).join('')
+
+  // Pre-fill wizard with saved data for regeneration
+  document.getElementById('seoCompanyName').value=data.company_name||''
+  document.getElementById('seoCompanyOffer').value=data.company_offer||''
+  document.getElementById('seoIndustry').value=data.industry||''
+  document.getElementById('seoLocations').value=data.locations||''
+  document.getElementById('seoTargetCustomer').value=data.target_customer||''
+  document.getElementById('seoCompetitors').value=data.competitors||''
+}
+function seoCopyMeta(){
+  const title=document.getElementById('seoMetaTitle').textContent
+  const desc=document.getElementById('seoMetaDesc').textContent
+  const html=`<title>${title}</title>\n<meta name="description" content="${desc}">`
+  navigator.clipboard.writeText(html).then(()=>toast('Meta-tags kopiert ✓','ok')).catch(()=>toast('Kopiering feilet','err'))
+}
+
 function L(key){return APP_I18N[appLang]?.[key]||APP_I18N.no[key]||key}
 function roleLabel(r){return{editor:L('roleEditor'),viewer:L('roleViewer'),admin:L('roleAdmin')}[r]||r}
 function statusLabel(s){return{pending:L('statusPending'),active:L('statusActive')}[s]||s}
