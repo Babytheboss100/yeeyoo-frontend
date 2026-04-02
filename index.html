@@ -277,9 +277,30 @@ body::after{
 .rbtn.img{color:#f59e0b;border-color:rgba(245,158,11,.2)}
 .rbtn.img:hover{background:rgba(245,158,11,.1)}
 .rbtn.img.loading{opacity:.6;pointer-events:none}
-.rc-image{margin:0 16px 12px;border-radius:10px;overflow:hidden;border:1px solid var(--border)}
+.rc-image{margin:0 16px 12px;border-radius:10px;overflow:hidden;border:1px solid var(--border);position:relative}
 .rc-image img{width:100%;display:block;border-radius:10px}
 .rc-image-placeholder{display:flex;align-items:center;justify-content:center;height:120px;background:rgba(255,255,255,.03);border-radius:10px;color:var(--muted);font-size:13px}
+.rc-image-actions{display:flex;gap:6px;padding:8px;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);border-radius:0 0 10px 10px}
+.rc-image-actions button{flex:1;padding:7px;font-family:var(--font);font-size:10px;font-weight:700;cursor:pointer;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:#fff;transition:all .15s}
+.rc-image-actions button:hover{background:rgba(255,255,255,.18)}
+
+/* Per-model loading spinners */
+.gen-loading-grid{display:flex;flex-wrap:wrap;gap:10px;padding:20px}
+.gen-model-status{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 18px;border-radius:var(--r);
+  background:var(--card);border:1px solid var(--border2);
+  min-width:180px;flex:1;
+}
+.gen-model-status .spin-lg{width:16px;height:16px;border:2px solid rgba(255,255,255,.15);border-top-color:currentColor;border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0}
+.gen-model-status.done{border-color:rgba(74,222,128,.3);background:rgba(74,222,128,.05)}
+.gen-model-status.done .spin-lg{display:none}
+.gen-model-status.error{border-color:rgba(248,113,113,.3);background:rgba(248,113,113,.05)}
+.gen-model-status .model-name{font-size:12px;font-weight:700;flex:1}
+.gen-model-status .model-check{color:var(--ok);font-size:14px;display:none}
+.gen-model-status.done .model-check{display:block}
+.gen-model-status .model-x{color:var(--hot);font-size:14px;display:none}
+.gen-model-status.error .model-x{display:block}
 
 
 /* ── QUEUE ── */
@@ -747,14 +768,36 @@ function renderProjList(){
 }
 async function generate(){
   const plats=getPlats();if(!plats.length){toast('Velg minst én plattform','err');return}
-  const btn=document.getElementById('genBtn'),led=document.getElementById('led')
+  const aiModels=getAIModels()
+  const btn=document.getElementById('genBtn'),led=document.getElementById('led'),area=document.getElementById('resultsArea')
   btn.disabled=true;btn.innerHTML='<span class="spin"></span> Genererer...';led.className='led busy';document.getElementById('ledTxt').textContent='Jobber...'
+
+  // Show per-model loading indicators
+  const aiColors={claude:'#c96442',gpt4o:'#10a37f',gemini:'#4285f4',grok:'#aaaaaa',deepseek:'#5e6ad2'}
+  const aiLabels={claude:'Claude',gpt4o:'GPT-4o',gemini:'Gemini',grok:'Grok',deepseek:'DeepSeek'}
+  area.innerHTML=`<div class="gen-loading-grid">${
+    plats.flatMap(p=>aiModels.map(m=>`
+      <div class="gen-model-status" id="gms-${p}-${m}" style="color:${aiColors[m]}">
+        <div class="spin-lg"></div>
+        <div class="model-name">${aiLabels[m]} · ${p}</div>
+        <span class="model-check">✓</span>
+        <span class="model-x">✕</span>
+      </div>`)).join('')
+  }</div>`
+
   try{
-    const r=await req('/content/generate',{method:'POST',body:JSON.stringify({projectId:currentProjectId,templateId:selectedTemplate,customPrompt:document.getElementById('customPrompt').value.trim(),platforms:plats,extraContext:document.getElementById('extraCtx').value.trim(),aiModels:getAIModels()})})
+    const r=await req('/content/generate',{method:'POST',body:JSON.stringify({projectId:currentProjectId,templateId:selectedTemplate,customPrompt:document.getElementById('customPrompt').value.trim(),platforms:plats,extraContext:document.getElementById('extraCtx').value.trim(),aiModels})})
+
+    // Mark all as done
+    r.posts.forEach(p=>{const el=document.getElementById('gms-'+p.platform+'-'+(p.ai_model||'claude'));if(el)el.classList.add('done')})
+    if(r.errors?.length)r.errors.forEach((e,i)=>{const els=document.querySelectorAll('.gen-model-status:not(.done)');if(els[i])els[i].classList.add('error')})
+
+    // Brief pause to show completion, then render results
+    await new Promise(r=>setTimeout(r,600))
     renderResults(r.posts)
     if(r.errors?.length)toast(`${r.errors.length} feil`,'err');else toast(`${r.posts.length} innlegg generert ✓`,'ok')
     updateBadge()
-  }catch(e){toast(e.message,'err')}
+  }catch(e){toast(e.message,'err');area.innerHTML=`<div class="empty-state"><div class="es-icon">⚠️</div><div class="es-text">${esc(e.message)}</div></div>`}
   finally{btn.disabled=false;btn.textContent='▶ Generer';led.className='led ok';document.getElementById('ledTxt').textContent='Klar';setTimeout(()=>{led.className='led'},3000)}
 }
 
@@ -764,17 +807,55 @@ async function genImage(postId){
   const body=document.getElementById('body-'+postId)
   if(!body)return
   btn.classList.add('loading')
-  btn.textContent='⏳ Genererer...'
+  btn.textContent='⏳ Genererer bilde...'
   try{
     const text=body.innerText.substring(0,300)
-    const d=await req('/content/generate-image',{method:'POST',body:JSON.stringify({postId,text})})
+    const d=await req('/content/generate-image',{method:'POST',body:JSON.stringify({postId,text,projectId:currentProjectId})})
     if(d.url){
       imgArea.style.display='block'
-      imgArea.innerHTML=`<img src="${d.url}" alt="Generert bilde" />`
+      imgArea.innerHTML=`
+        <img src="${d.url}" alt="Generert bilde" loading="lazy" />
+        <div class="rc-image-actions">
+          <button onclick="copyImageUrl('${d.url}')">📋 Kopier URL</button>
+          <button onclick="downloadImage('${d.url}','yeeyoo-${postId}.png')">⬇ Last ned</button>
+          <button onclick="copyImageToClipboard('${d.url}')">🖼 Kopier bilde</button>
+        </div>`
       toast('Bilde generert ✓','ok')
     }
   }catch(e){toast('Bilde feilet: '+e.message,'err')}
   finally{btn.classList.remove('loading');btn.textContent='🖼 Bilde'}
+}
+
+async function copyImageUrl(url){
+  await navigator.clipboard.writeText(url)
+  toast('Bilde-URL kopiert ✓','ok')
+}
+
+async function downloadImage(url,filename){
+  try{
+    toast('Laster ned...','info')
+    const r=await fetch(url)
+    const blob=await r.blob()
+    const a=document.createElement('a')
+    a.href=URL.createObjectURL(blob)
+    a.download=filename
+    a.click()
+    URL.revokeObjectURL(a.href)
+    toast('Bilde lastet ned ✓','ok')
+  }catch{toast('Nedlasting feilet','err')}
+}
+
+async function copyImageToClipboard(url){
+  try{
+    const r=await fetch(url)
+    const blob=await r.blob()
+    await navigator.clipboard.write([new ClipboardItem({'image/png':blob})])
+    toast('Bilde kopiert til utklippstavle ✓','ok')
+  }catch{
+    // Fallback: copy URL
+    await navigator.clipboard.writeText(url)
+    toast('Bilde-URL kopiert (bilde-kopiering ikke støttet i denne nettleseren)','info')
+  }
 }
 
 function renderResults(posts){
@@ -800,11 +881,12 @@ function renderResults(posts){
       <div class="rc-body" id="body-${p.id}" contenteditable="true" oninput="updCC('${p.id}')">${esc(p.content)}</div>
       <div class="rc-foot">
         <button class="rbtn approve" onclick="approvePost('${p.id}')">✓ Godkjenn</button>
+        <button class="rbtn" onclick="copyPost('${p.id}')" title="Kopier tekst">📋 Kopier tekst</button>
+        <button class="rbtn img" id="imgbtn-${p.id}" onclick="genImage('${p.id}')">🖼 Generer bilde</button>
         <button class="rbtn regen" onclick="regenPost('${p.id}','${p.platform}')">↻ Regenerer</button>
-        <button class="rbtn" onclick="copyPost('${p.id}')">⎘ Kopi</button>
         <button class="rbtn del" onclick="delPost('${p.id}')">✕</button>
-        <button class="rbtn img" id="imgbtn-${p.id}" onclick="genImage('${p.id}')">🖼 Bilde</button>
-            <div class="rc-image" id="img-${p.id}" style="display:none"></div>
+      </div>
+      <div class="rc-image" id="img-${p.id}" style="display:none"></div>
     </div>`}).join('')
 }
 function updCC(id){const b=document.getElementById('body-'+id),c=document.getElementById('cc-'+id);if(b&&c)c.textContent=b.innerText.length+' tegn'}
