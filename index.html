@@ -1043,28 +1043,44 @@ async function genImage(postId){
   imgArea.innerHTML=`<div class="rc-image-loading"><div class="spin-img"></div><span>Genererer bilde...</span></div>`
 
   try{
-    const text=body.innerText.substring(0,300)
+    const text=body.innerText.substring(0,200)
     const d=await req('/content/generate-image',{method:'POST',body:JSON.stringify({postId,text,projectId:currentProjectId})})
-    if(!d.url)throw new Error('Ingen URL returnert')
-    const imageUrl=d.url
-    const img=new Image()
-    const timeout=setTimeout(()=>{if(!img.complete){img.src='';showImgError(postId,imgArea,btn,'Tidsavbrudd — bildet tok for lang tid')}},30000)
+    if(!d.url)throw new Error('Ingen URL')
+    await loadImgWithFallback(d.url,postId,imgArea,btn)
+  }catch(e){showImgError(postId,imgArea,btn,e.message)}
+}
 
-    img.onload=()=>{
-      clearTimeout(timeout)
-      imgArea.innerHTML=`<img src="${imageUrl}" alt="Generert bilde" style="width:100%;display:block;border-radius:10px"/>
+async function loadImgWithFallback(url,postId,imgArea,btn){
+  // Try primary URL, then fallback to simpler prompt
+  const fallbackUrl=`https://image.pollinations.ai/prompt/professional%20business%20marketing?nologo=true&seed=${Date.now()%99999}`
+  const urls=[url,fallbackUrl]
+
+  for(const imgUrl of urls){
+    try{
+      await new Promise((resolve,reject)=>{
+        const img=new Image()
+        const t=setTimeout(()=>{img.src='';reject(new Error('timeout'))},20000)
+        img.onload=()=>{clearTimeout(t);resolve(img)}
+        img.onerror=()=>{clearTimeout(t);reject(new Error('load failed'))}
+        img.src=imgUrl
+      })
+      // Success — show the image
+      const safeUrl=imgUrl.replace(/'/g,'%27')
+      imgArea.innerHTML=`<img src="${safeUrl}" alt="Generert bilde" style="width:100%;display:block;border-radius:10px"/>
         <div class="rc-image-actions">
-          <button onclick="copyImageUrl('${imageUrl}')">📋 Kopier URL</button>
-          <button onclick="downloadImage('${imageUrl}','yeeyoo-${postId}.png')">⬇ Last ned</button>
-          <button onclick="copyImageToClipboard('${imageUrl}')">🖼 Kopier bilde</button>
+          <button onclick="copyImageUrl('${safeUrl}')">📋 Kopier URL</button>
+          <button onclick="downloadImage('${safeUrl}','yeeyoo-${postId}.png')">⬇ Last ned</button>
+          <button onclick="copyImageToClipboard('${safeUrl}')">🖼 Kopier bilde</button>
         </div>`
       toast('Bilde generert ✓','ok')
       btn.classList.remove('loading');btn.textContent='🖼 Nytt bilde'
-    }
-    img.onerror=()=>{clearTimeout(timeout);showImgError(postId,imgArea,btn,'Bildet kunne ikke lastes')}
-    img.src=imageUrl
-  }catch(e){showImgError(postId,imgArea,btn,e.message)}
+      return // done
+    }catch{continue} // try next URL
+  }
+  // All URLs failed
+  showImgError(postId,imgArea,btn,'Bildegenerering utilgjengelig akkurat nå')
 }
+
 function showImgError(postId,imgArea,btn,msg){
   imgArea.innerHTML=`<div class="rc-image-error" onclick="genImage('${postId}')"><span style="font-size:32px">🖼️</span><span>${esc(msg)}</span><span class="retry-txt">Klikk for å prøve igjen ↻</span></div>`
   btn.classList.remove('loading');btn.textContent='🖼 Prøv igjen'
