@@ -980,10 +980,13 @@ window.onload=async()=>{
       clearTimeout(timeout)
       if(!r.ok)throw new Error('invalid')
       const me=await r.json()
-      if(me&&me.id){currentUser=me;showApp();return}
-      throw new Error('no user')
+      if(me&&me.id){
+        console.log('[auth] Valid session for:',me.email)
+        currentUser=me;showApp();return
+      }
+      throw new Error('no user in response')
     }catch(e){
-      console.log('[auth] Token validation failed:',e.message)
+      console.log('[auth] Token cleared:',e.message)
       token=null;localStorage.removeItem('yeeyoo_token')
     }
   }
