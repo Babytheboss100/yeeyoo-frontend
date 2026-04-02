@@ -279,7 +279,12 @@ body::after{
 .rbtn.img.loading{opacity:.6;pointer-events:none}
 .rc-image{margin:0 16px 12px;border-radius:10px;overflow:hidden;border:1px solid var(--border);position:relative}
 .rc-image img{width:100%;display:block;border-radius:10px}
-.rc-image-placeholder{display:flex;align-items:center;justify-content:center;height:120px;background:rgba(255,255,255,.03);border-radius:10px;color:var(--muted);font-size:13px}
+.rc-image-loading{display:flex;align-items:center;justify-content:center;height:200px;background:rgba(255,255,255,.03);border-radius:10px;gap:10px}
+.rc-image-loading .spin-img{width:24px;height:24px;border:3px solid rgba(255,255,255,.1);border-top-color:var(--purple2);border-radius:50%;animation:spin .7s linear infinite}
+.rc-image-loading span{color:var(--muted);font-size:13px;font-weight:600}
+.rc-image-error{display:flex;flex-direction:column;align-items:center;justify-content:center;height:180px;background:linear-gradient(135deg,rgba(45,91,227,.08),rgba(124,58,237,.08));border-radius:10px;gap:8px;cursor:pointer}
+.rc-image-error span{font-size:13px;color:var(--muted)}
+.rc-image-error .retry-txt{font-size:11px;color:var(--blue2);font-weight:600}
 .rc-image-actions{display:flex;gap:6px;padding:8px;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);border-radius:0 0 10px 10px}
 .rc-image-actions button{flex:1;padding:7px;font-family:var(--font);font-size:10px;font-weight:700;cursor:pointer;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:#fff;transition:all .15s}
 .rc-image-actions button:hover{background:rgba(255,255,255,.18)}
@@ -752,17 +757,7 @@ body::after{
             <div style="display:flex;flex-direction:column;gap:8px" id="planButtons"></div>
           </div>
 
-          <div class="settings-card">
-            <div class="sc-title">API-nøkkel</div>
-            <div class="fld">
-              <label class="fld-label">Anthropic API Key</label>
-              <div class="fld-row">
-                <input class="fld-input" id="apiKeyInput" type="password" placeholder="sk-ant-api03-...">
-                <button class="btn-pri" onclick="saveKey()">Lagre</button>
-              </div>
-              <p style="font-size:11px;color:var(--muted);margin-top:6px">Lagres kun lokalt. Aldri delt.</p>
-            </div>
-          </div>
+          <!-- API-nøkler håndteres av backend — ikke synlig for brukere -->
           <div class="settings-card">
             <div class="sc-title">Prosjekter</div>
             <div class="proj-list" id="projList"></div>
@@ -1008,24 +1003,36 @@ async function genImage(postId){
   const imgArea=document.getElementById('img-'+postId)
   const body=document.getElementById('body-'+postId)
   if(!body)return
-  btn.classList.add('loading')
-  btn.textContent='⏳ Genererer bilde...'
+  btn.classList.add('loading');btn.textContent='⏳ Genererer...'
+  imgArea.style.display='block'
+  imgArea.innerHTML=`<div class="rc-image-loading"><div class="spin-img"></div><span>Genererer bilde...</span></div>`
+
   try{
     const text=body.innerText.substring(0,300)
     const d=await req('/content/generate-image',{method:'POST',body:JSON.stringify({postId,text,projectId:currentProjectId})})
-    if(d.url){
-      imgArea.style.display='block'
-      imgArea.innerHTML=`
-        <img src="${d.url}" alt="Generert bilde" loading="lazy" />
+    if(!d.url)throw new Error('Ingen URL returnert')
+    const imageUrl=d.url
+    const img=new Image()
+    const timeout=setTimeout(()=>{if(!img.complete){img.src='';showImgError(postId,imgArea,btn,'Tidsavbrudd — bildet tok for lang tid')}},30000)
+
+    img.onload=()=>{
+      clearTimeout(timeout)
+      imgArea.innerHTML=`<img src="${imageUrl}" alt="Generert bilde" style="width:100%;display:block;border-radius:10px"/>
         <div class="rc-image-actions">
-          <button onclick="copyImageUrl('${d.url}')">📋 Kopier URL</button>
-          <button onclick="downloadImage('${d.url}','yeeyoo-${postId}.png')">⬇ Last ned</button>
-          <button onclick="copyImageToClipboard('${d.url}')">🖼 Kopier bilde</button>
+          <button onclick="copyImageUrl('${imageUrl}')">📋 Kopier URL</button>
+          <button onclick="downloadImage('${imageUrl}','yeeyoo-${postId}.png')">⬇ Last ned</button>
+          <button onclick="copyImageToClipboard('${imageUrl}')">🖼 Kopier bilde</button>
         </div>`
       toast('Bilde generert ✓','ok')
+      btn.classList.remove('loading');btn.textContent='🖼 Nytt bilde'
     }
-  }catch(e){toast('Bilde feilet: '+e.message,'err')}
-  finally{btn.classList.remove('loading');btn.textContent='🖼 Bilde'}
+    img.onerror=()=>{clearTimeout(timeout);showImgError(postId,imgArea,btn,'Bildet kunne ikke lastes')}
+    img.src=imageUrl
+  }catch(e){showImgError(postId,imgArea,btn,e.message)}
+}
+function showImgError(postId,imgArea,btn,msg){
+  imgArea.innerHTML=`<div class="rc-image-error" onclick="genImage('${postId}')"><span style="font-size:32px">🖼️</span><span>${esc(msg)}</span><span class="retry-txt">Klikk for å prøve igjen ↻</span></div>`
+  btn.classList.remove('loading');btn.textContent='🖼 Prøv igjen'
 }
 
 async function copyImageUrl(url){
@@ -1207,7 +1214,7 @@ async function openPortal() {
   } catch(e) { toast(e.message, 'err') }
 }
 
-function saveKey(){const k=document.getElementById('apiKeyInput').value.trim();if(k){localStorage.setItem('yeeyoo_api_key',k);toast('API-nøkkel lagret ✓','ok')}}
+// API keys handled by backend — no client-side key storage
 function pickC(el){document.querySelectorAll('.cswatch').forEach(s=>s.classList.remove('active'));el.classList.add('active');selectedColor=el.dataset.c}
 async function createProj(){
   const name=document.getElementById('npName').value.trim();if(!name){toast('Navn er påkrevd','err');return}
