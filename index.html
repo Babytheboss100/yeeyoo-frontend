@@ -449,6 +449,58 @@ body::after{
 .spin{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:5px}
 @keyframes spin{to{transform:rotate(360deg)}}
 
+/* ── ONBOARDING ── */
+.onboard-overlay{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:rgba(5,7,20,.92);backdrop-filter:blur(12px)}
+.onboard-box{width:520px;padding:40px;background:linear-gradient(145deg,rgba(12,17,48,.98),rgba(8,12,30,.98));border:1px solid var(--border2);border-radius:20px;box-shadow:0 40px 100px rgba(0,0,0,.6);text-align:center}
+.onboard-step{display:none}.onboard-step.active{display:block}
+.onboard-title{font-size:22px;font-weight:800;margin-bottom:8px}
+.onboard-sub{color:var(--muted);font-size:14px;margin-bottom:28px}
+.onboard-progress{display:flex;gap:6px;justify-content:center;margin-bottom:24px}
+.onboard-dot{width:10px;height:10px;border-radius:50%;background:var(--card2);transition:all .3s}
+.onboard-dot.active{background:linear-gradient(135deg,var(--blue),var(--purple));box-shadow:0 0 10px var(--glow-purple)}
+
+/* ── INDUSTRY TEMPLATES ── */
+.ind-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.ind-card{padding:14px;border:1px solid var(--border2);border-radius:var(--r2);background:var(--card);cursor:pointer;transition:all .15s;text-align:left}
+.ind-card:hover{border-color:var(--purple2);background:var(--card2);transform:translateY(-2px)}
+.ind-card.active{border-color:var(--purple2);background:rgba(124,58,237,.12)}
+.ind-emoji{font-size:24px;margin-bottom:8px}
+.ind-name{font-size:12px;font-weight:700;color:var(--white)}
+.ind-tone{font-size:10px;color:var(--muted);margin-top:4px;line-height:1.3}
+
+/* ── NOTIFICATIONS ── */
+.notif-bell{position:relative;cursor:pointer;padding:4px}
+.notif-badge{position:absolute;top:-2px;right:-4px;min-width:16px;height:16px;border-radius:8px;background:var(--hot);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.notif-panel{position:absolute;top:100%;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--navy3);border:1px solid var(--border2);border-radius:var(--r2);box-shadow:0 20px 60px rgba(0,0,0,.5);z-index:200;display:none}
+.notif-panel.open{display:block}
+.notif-header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--border)}
+.notif-item{padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
+.notif-item:hover{background:var(--card2)}
+.notif-item.unread{border-left:3px solid var(--purple2)}
+.notif-title{font-size:12px;font-weight:700;color:var(--white)}
+.notif-msg{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4}
+.notif-time{font-size:10px;color:var(--muted2);margin-top:4px}
+.notif-empty{padding:30px;text-align:center;color:var(--muted);font-size:13px}
+
+/* ── TEAM ── */
+.team-list{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.team-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--card);border:1px solid var(--border);border-radius:var(--r)}
+.team-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.team-info{flex:1}
+.team-email{font-size:12px;font-weight:600;color:var(--white)}
+.team-role{font-size:10px;color:var(--muted)}
+.team-role-sel{background:var(--card2);border:1px solid var(--border);color:var(--white);font-size:10px;padding:3px 8px;border-radius:4px;font-family:var(--font)}
+
+/* ── ANALYTICS CHART ── */
+.analytics-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+.analytics-card{background:var(--card);border:1px solid var(--border2);border-radius:var(--r2);padding:20px}
+.analytics-title{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:14px}
+.mini-bar{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.mini-bar-label{width:70px;font-size:11px;color:var(--muted);font-weight:600}
+.mini-bar-track{flex:1;height:6px;background:var(--card2);border-radius:3px;overflow:hidden}
+.mini-bar-fill{height:100%;border-radius:3px;transition:width .5s ease}
+.mini-bar-val{width:28px;font-size:11px;color:var(--muted);text-align:right;font-weight:600}
+
 /* ── CALENDAR ── */
 .cal-wrap{flex:1;overflow-y:auto;padding:24px}
 .cal-toolbar{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:20px}
@@ -527,6 +579,16 @@ body::after{
       <div class="tb-tab" onclick="showTab('settings')" data-tab="settings">⚙ Innstillinger</div>
     </div>
     <div class="tb-right">
+      <div class="notif-bell" onclick="toggleNotifPanel()">
+        🔔<span class="notif-badge" id="notifBadge" style="display:none">0</span>
+        <div class="notif-panel" id="notifPanel">
+          <div class="notif-header">
+            <span style="font-size:12px;font-weight:700">Varsler</span>
+            <button class="rbtn" onclick="event.stopPropagation();markAllRead()" style="font-size:9px;padding:3px 8px">Les alle</button>
+          </div>
+          <div id="notifList"><div class="notif-empty">Ingen varsler</div></div>
+        </div>
+      </div>
       <div class="tb-status">
         <div class="led" id="led"></div>
         <span id="ledTxt">Klar</span>
@@ -578,6 +640,10 @@ body::after{
               </button>
             </div>
             <p style="font-size:9px;color:var(--muted2);margin-top:8px;line-height:1.4">Velg én eller flere — resultater vises side om side</p>
+          </div>
+          <div class="sidebar-block">
+            <div class="sb-title">Bransjemaler</div>
+            <div class="ind-grid" id="indTemplateGrid"></div>
           </div>
         </div>
         <div class="gen-main">
@@ -637,9 +703,23 @@ body::after{
           <div class="stat-card"><div class="stat-num" id="statApproved">—</div><div class="stat-lbl">Godkjent</div></div>
           <div class="stat-card"><div class="stat-num" id="statPublished">—</div><div class="stat-lbl">Publisert</div></div>
         </div>
-        <div class="chart-wrap">
-          <div class="chart-section-title">Plattform-fordeling</div>
-          <div id="chartBars"></div>
+        <div class="analytics-grid" id="analyticsGrid">
+          <div class="analytics-card">
+            <div class="analytics-title">Per plattform</div>
+            <div id="chartPlatform"></div>
+          </div>
+          <div class="analytics-card">
+            <div class="analytics-title">Per AI-modell</div>
+            <div id="chartModel"></div>
+          </div>
+          <div class="analytics-card">
+            <div class="analytics-title">Per prosjekt</div>
+            <div id="chartProject"></div>
+          </div>
+          <div class="analytics-card">
+            <div class="analytics-title">Siste 30 dager</div>
+            <div id="chartDaily"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -711,12 +791,69 @@ body::after{
               </div>
             </div>
           </div>
+
+          <!-- Team -->
+          <div class="settings-card">
+            <div class="sc-title">Team</div>
+            <div class="team-list" id="teamList"><p style="font-size:12px;color:var(--muted)">Ingen teammedlemmer ennå.</p></div>
+            <div class="fld-row" style="margin-top:10px">
+              <input class="fld-input" id="teamEmail" placeholder="epost@teammedlem.no" type="email">
+              <select class="fld-input" id="teamRole" style="width:110px">
+                <option value="editor">Editor</option>
+                <option value="viewer">Viewer</option>
+                <option value="admin">Admin</option>
+              </select>
+              <button class="btn-pri" onclick="inviteTeam()">Inviter</button>
+            </div>
+          </div>
+
+          <!-- Export -->
+          <div class="settings-card">
+            <div class="sc-title">Eksporter innhold</div>
+            <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Last ned alt innholdet ditt som CSV-fil.</p>
+            <div style="display:flex;gap:8px">
+              <button class="btn-pri" onclick="exportCSV()">📥 Last ned CSV</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
   </div>
 </div>
+<!-- ONBOARDING -->
+<div class="onboard-overlay" id="onboardOverlay" style="display:none">
+  <div class="onboard-box">
+    <div class="onboard-progress"><div class="onboard-dot active"></div><div class="onboard-dot"></div><div class="onboard-dot"></div></div>
+    <div class="onboard-step active" id="ob-step-1">
+      <div style="font-size:40px;margin-bottom:16px">👋</div>
+      <div class="onboard-title">Velkommen til Yeeyoo!</div>
+      <div class="onboard-sub">La oss sette opp din AI-agent for markedsføring på under 2 minutter.</div>
+      <button class="btn-pri" onclick="obNext(2)" style="width:100%">La oss starte →</button>
+    </div>
+    <div class="onboard-step" id="ob-step-2">
+      <div style="font-size:40px;margin-bottom:16px">🏢</div>
+      <div class="onboard-title">Opprett ditt første prosjekt</div>
+      <div class="onboard-sub">Beskriv bedriften din — AI tilpasser alt innhold etter dette.</div>
+      <div style="text-align:left">
+        <div class="fld"><label class="fld-label">Bedriftsnavn</label><input class="fld-input" id="obProjName" placeholder="Din bedrift AS"></div>
+        <div class="fld"><label class="fld-label">Kort om bedriften</label><textarea class="fld-ta" id="obProjAbout" rows="2" placeholder="Hva gjør dere?"></textarea></div>
+        <div class="fld"><label class="fld-label">Målgruppe</label><input class="fld-input" id="obProjAud" placeholder="F.eks. Norske gründere 25-45"></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button class="btn-sec" onclick="obNext(1)" style="flex:1">← Tilbake</button>
+        <button class="btn-pri" onclick="obCreateProject()" style="flex:2" id="obProjBtn">Opprett prosjekt →</button>
+      </div>
+    </div>
+    <div class="onboard-step" id="ob-step-3">
+      <div style="font-size:40px;margin-bottom:16px">🎉</div>
+      <div class="onboard-title">Alt klart!</div>
+      <div class="onboard-sub">Prosjektet er opprettet. Velg en innholdstype og klikk Generer for å lage ditt første innlegg.</div>
+      <button class="btn-pri" onclick="obComplete()" style="width:100%">Start å generere ⚡</button>
+    </div>
+  </div>
+</div>
+
 <!-- SCHEDULE MODAL -->
 <div class="modal-overlay" id="scheduleModal" style="display:none" onclick="if(event.target===this)closeScheduleModal()">
   <div class="modal-box">
@@ -787,13 +924,14 @@ async function showApp(){
   document.getElementById('userName').textContent=n
   document.getElementById('userAvatar').textContent=n[0].toUpperCase()
   await loadTemplates();await loadProjects();await loadStats()
+  loadIndustryTemplates();loadNotifications();checkOnboarding()
 }
 function showTab(name){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'))
   document.querySelectorAll('.tb-tab').forEach(t=>t.classList.remove('active'))
   document.getElementById('tab-'+name).classList.add('active')
   document.querySelector('[data-tab="'+name+'"]').classList.add('active')
-  if(name==='queue')loadQueue();if(name==='calendar')loadCalendar();if(name==='stats')loadStats();if(name==='settings'){renderProjList();loadBilling()}
+  if(name==='queue')loadQueue();if(name==='calendar')loadCalendar();if(name==='stats'){loadStats();loadAnalytics()};if(name==='settings'){renderProjList();loadBilling();loadTeam()}
 }
 async function loadTemplates(){try{templates=await req('/content/templates');renderTpl()}catch{}}
 function renderTpl(){
@@ -1088,6 +1226,172 @@ function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').repl
 function escA(s){return String(s).replace(/\\/g,'\\\\').replace(/`/g,'\\`').replace(/\$/g,'\\$')}
 async function cpTxt(t){await navigator.clipboard.writeText(t);toast('Kopiert ✓','ok')}
 let tt;function toast(msg,type='info'){const el=document.getElementById('toast');el.textContent=msg;el.className='toast '+type;el.style.display='block';clearTimeout(tt);tt=setTimeout(()=>el.style.display='none',3000)}
+
+// ─── ONBOARDING ───────────────────────────────────────────────────────────────
+async function checkOnboarding(){
+  try{
+    const s=await req('/onboarding/status')
+    if(!s.done){document.getElementById('onboardOverlay').style.display='flex'}
+  }catch{}
+}
+function obNext(step){
+  document.querySelectorAll('.onboard-step').forEach(s=>s.classList.remove('active'))
+  document.getElementById('ob-step-'+step).classList.add('active')
+  document.querySelectorAll('.onboard-dot').forEach((d,i)=>d.classList.toggle('active',i<step))
+}
+async function obCreateProject(){
+  const name=document.getElementById('obProjName').value.trim()
+  if(!name){toast('Skriv inn bedriftsnavn','err');return}
+  const btn=document.getElementById('obProjBtn');btn.disabled=true;btn.innerHTML='<span class="spin"></span>'
+  try{
+    const p=await req('/projects',{method:'POST',body:JSON.stringify({name,color:'#4f7fff',about:document.getElementById('obProjAbout').value.trim(),audience:document.getElementById('obProjAud').value.trim(),tone:'Profesjonell og engasjerende',keywords:''})})
+    projects.push(p);currentProjectId=p.id;renderProjSel()
+    obNext(3)
+  }catch(e){toast(e.message,'err')}
+  finally{btn.disabled=false;btn.textContent='Opprett prosjekt →'}
+}
+async function obComplete(){
+  try{await req('/onboarding/complete',{method:'POST'})}catch{}
+  document.getElementById('onboardOverlay').style.display='none'
+  toast('Velkommen! Start med å generere innhold ⚡','ok')
+}
+
+// ─── INDUSTRY TEMPLATES ──────────────────────────────────────────────────────
+let industryTemplates=[]
+async function loadIndustryTemplates(){
+  try{industryTemplates=await req('/content/industry-templates');renderIndTemplates()}catch{}
+}
+function renderIndTemplates(){
+  const el=document.getElementById('indTemplateGrid');if(!el)return
+  el.innerHTML=industryTemplates.map(t=>
+    `<div class="ind-card" onclick="applyIndustryTemplate('${t.id}')" title="${t.tone}">
+      <div class="ind-emoji">${t.emoji}</div>
+      <div class="ind-name">${t.name}</div>
+    </div>`
+  ).join('')
+}
+async function applyIndustryTemplate(id){
+  const t=industryTemplates.find(t=>t.id===id);if(!t)return
+  // Update current project with industry settings
+  if(currentProjectId){
+    try{
+      await req('/projects/'+currentProjectId,{method:'PUT',body:JSON.stringify({name:projects.find(p=>p.id===currentProjectId)?.name||t.name,color:t.color,tone:t.tone,audience:t.audience,keywords:t.keywords,about:t.about})})
+      const idx=projects.findIndex(p=>p.id===currentProjectId)
+      if(idx>=0)Object.assign(projects[idx],{tone:t.tone,audience:t.audience,keywords:t.keywords,about:t.about,color:t.color})
+      toast(`Bransjemal "${t.name}" brukt ✓`,'ok')
+    }catch(e){toast(e.message,'err')}
+  }
+  // Highlight card
+  document.querySelectorAll('.ind-card').forEach(c=>c.classList.remove('active'))
+  document.querySelector(`.ind-card[onclick*="${id}"]`)?.classList.add('active')
+}
+
+// ─── NOTIFICATIONS ────────────────────────────────────────────────────────────
+let notifications=[]
+async function loadNotifications(){
+  try{
+    const [notifs,count]=await Promise.all([req('/notifications'),req('/notifications/unread-count')])
+    notifications=notifs
+    const badge=document.getElementById('notifBadge')
+    if(count.count>0){badge.style.display='flex';badge.textContent=count.count}
+    else badge.style.display='none'
+  }catch{}
+}
+function toggleNotifPanel(){
+  const p=document.getElementById('notifPanel');p.classList.toggle('open')
+  if(p.classList.contains('open'))renderNotifications()
+}
+function renderNotifications(){
+  const el=document.getElementById('notifList')
+  if(!notifications.length){el.innerHTML='<div class="notif-empty">Ingen varsler ennå</div>';return}
+  el.innerHTML=notifications.map(n=>`
+    <div class="notif-item ${n.read?'':'unread'}" onclick="markNotifRead('${n.id}')">
+      <div class="notif-title">${esc(n.title)}</div>
+      <div class="notif-msg">${esc(n.message)}</div>
+      <div class="notif-time">${new Date(n.created_at).toLocaleString('no-NO')}</div>
+    </div>`).join('')
+}
+async function markNotifRead(id){try{await req('/notifications/'+id+'/read',{method:'PATCH'});loadNotifications()}catch{}}
+async function markAllRead(){try{await req('/notifications/read-all',{method:'PATCH'});loadNotifications();toast('Alle lest ✓','ok')}catch{}}
+
+// ─── TEAM ─────────────────────────────────────────────────────────────────────
+async function loadTeam(){
+  if(!currentProjectId)return
+  try{
+    const members=await req('/team/'+currentProjectId)
+    const el=document.getElementById('teamList')
+    if(!members.length){el.innerHTML='<p style="font-size:12px;color:var(--muted)">Ingen teammedlemmer ennå.</p>';return}
+    el.innerHTML=members.map(m=>`
+      <div class="team-row">
+        <div class="team-avatar">${(m.user_name||m.email)[0].toUpperCase()}</div>
+        <div class="team-info"><div class="team-email">${esc(m.email)}</div><div class="team-role">${m.role} · ${m.status}</div></div>
+        <button class="rbtn del" onclick="removeTeamMember('${m.id}')">✕</button>
+      </div>`).join('')
+  }catch{}
+}
+async function inviteTeam(){
+  const email=document.getElementById('teamEmail').value.trim()
+  const role=document.getElementById('teamRole').value
+  if(!email){toast('Skriv inn e-post','err');return}
+  try{
+    await req('/team/invite',{method:'POST',body:JSON.stringify({projectId:currentProjectId,email,role})})
+    toast(`${email} invitert som ${role} ✓`,'ok')
+    document.getElementById('teamEmail').value=''
+    loadTeam()
+  }catch(e){toast(e.message,'err')}
+}
+async function removeTeamMember(id){
+  try{await req('/team/'+id,{method:'DELETE'});loadTeam();toast('Fjernet','info')}catch(e){toast(e.message,'err')}
+}
+
+// ─── EXPORT ───────────────────────────────────────────────────────────────────
+async function exportCSV(){
+  toast('Laster ned...','info')
+  try{
+    const r=await fetch(API+'/export/csv',{headers:{'Authorization':'Bearer '+token}})
+    const blob=await r.blob()
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob)
+    a.download='yeeyoo-innhold.csv';a.click();URL.revokeObjectURL(a.href)
+    toast('CSV lastet ned ✓','ok')
+  }catch{toast('Eksport feilet','err')}
+}
+
+// ─── ENHANCED ANALYTICS ───────────────────────────────────────────────────────
+async function loadAnalytics(){
+  try{
+    const d=await req('/export/analytics')
+    const platColors={linkedin:'#0077B5',facebook:'#1877F2',instagram:'#E1306C',twitter:'#888',tiktok:'#69C9D0'}
+    const modelColors={claude:'#c96442',gpt4o:'#10a37f',gemini:'#4285f4',grok:'#aaaaaa',deepseek:'#5e6ad2'}
+
+    // Platform chart
+    const pMax=Math.max(...d.byPlatform.map(r=>parseInt(r.count)),1)
+    document.getElementById('chartPlatform').innerHTML=d.byPlatform.map(r=>`
+      <div class="mini-bar"><div class="mini-bar-label">${r.platform}</div>
+      <div class="mini-bar-track"><div class="mini-bar-fill" style="width:${(r.count/pMax)*100}%;background:${platColors[r.platform]||'var(--blue)'}"></div></div>
+      <div class="mini-bar-val">${r.count}</div></div>`).join('')||'<p style="font-size:11px;color:var(--muted)">Ingen data</p>'
+
+    // Model chart
+    const mMax=Math.max(...d.byModel.map(r=>parseInt(r.count)),1)
+    document.getElementById('chartModel').innerHTML=d.byModel.map(r=>`
+      <div class="mini-bar"><div class="mini-bar-label">${r.model}</div>
+      <div class="mini-bar-track"><div class="mini-bar-fill" style="width:${(r.count/mMax)*100}%;background:${modelColors[r.model]||'var(--purple)'}"></div></div>
+      <div class="mini-bar-val">${r.count}</div></div>`).join('')||'<p style="font-size:11px;color:var(--muted)">Ingen data</p>'
+
+    // Project chart
+    const prMax=Math.max(...d.byProject.map(r=>parseInt(r.count)),1)
+    document.getElementById('chartProject').innerHTML=d.byProject.map(r=>`
+      <div class="mini-bar"><div class="mini-bar-label">${r.name.substring(0,12)}</div>
+      <div class="mini-bar-track"><div class="mini-bar-fill" style="width:${(r.count/prMax)*100}%;background:${r.color||'var(--blue)'}"></div></div>
+      <div class="mini-bar-val">${r.count}</div></div>`).join('')||'<p style="font-size:11px;color:var(--muted)">Ingen data</p>'
+
+    // Daily chart (last 30 days)
+    const dMax=Math.max(...d.byDay.map(r=>parseInt(r.count)),1)
+    document.getElementById('chartDaily').innerHTML=d.byDay.slice(-14).map(r=>`
+      <div class="mini-bar"><div class="mini-bar-label">${new Date(r.day).toLocaleDateString('no-NO',{day:'numeric',month:'short'})}</div>
+      <div class="mini-bar-track"><div class="mini-bar-fill" style="width:${(r.count/dMax)*100}%;background:linear-gradient(90deg,var(--blue),var(--purple))"></div></div>
+      <div class="mini-bar-val">${r.count}</div></div>`).join('')||'<p style="font-size:11px;color:var(--muted)">Ingen data</p>'
+  }catch{}
+}
 
 // ─── CALENDAR ─────────────────────────────────────────────────────────────────
 let calYear=new Date().getFullYear(), calMonth=new Date().getMonth(), calPosts=[], schedulePostId=null
