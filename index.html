@@ -108,12 +108,12 @@ body::after{
 
 /* TOPBAR */
 .topbar{
-  height:54px;flex-shrink:0;display:flex;align-items:stretch;
+  height:70px;flex-shrink:0;display:flex;align-items:center;
   background:rgba(5,7,20,.88);
   border-bottom:1px solid var(--border2);
   backdrop-filter:blur(24px);
 }
-.tb-brand{display:flex;align-items:center;gap:10px;padding:0 22px;border-right:1px solid var(--border);min-width:168px}
+.tb-brand{display:flex;align-items:center;gap:10px;padding:0 22px;border-right:1px solid var(--border);min-width:168px;height:100%}
 .tb-logo-mark{
   width:30px;height:30px;border-radius:7px;
   background:linear-gradient(135deg,var(--blue),var(--purple));
@@ -742,7 +742,7 @@ body::after{
 <div class="app" id="app">
   <div class="topbar">
     <div class="tb-brand">
-      <img src="logo.png" style="height:70px;object-fit:contain;filter:brightness(1.2)" alt="Yeeyoo">
+      <img src="logo.png" style="height:100px;object-fit:contain;filter:brightness(1.2);margin:0;padding:0;display:block" alt="Yeeyoo">
     </div>
     <div class="tb-project">
       <span class="tb-proj-label">Prosjekt</span>
