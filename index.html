@@ -1164,8 +1164,14 @@ body::after{
           <button class="btn-sec" style="margin-left:auto;font-size:10px;padding:4px 10px" onclick="spClosePostModal()">Lukk</button>
         </div>
         <div class="sp-post-content" id="spModalContent">—</div>
-        <div style="display:flex;gap:8px;margin-top:12px">
-          <div class="fld" style="flex:1;margin:0">
+        <div id="spImgWrap" style="margin-top:12px;display:none">
+          <img id="spImgResult" style="width:100%;border-radius:var(--r);max-height:300px;object-fit:cover">
+          <a id="spImgDownload" download="yeeyoo-post.webp" style="display:inline-block;margin-top:8px;font-size:12px;font-weight:700;color:var(--blue2);cursor:pointer">Last ned bilde</a>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+          <button class="btn-sec" id="spImgBtn" onclick="spGenerateImage()" style="font-size:12px;padding:8px 14px">Generer bilde</button>
+          <div style="flex:1"></div>
+          <div class="fld" style="flex:2;margin:0;min-width:180px">
             <label class="fld-label">Endre tidspunkt</label>
             <input class="fld-input" type="datetime-local" id="spModalDatetime">
           </div>
@@ -2848,6 +2854,7 @@ function spOpenPost(id){
     document.getElementById('spModalDatetime').value=local
   }
 
+  document.getElementById('spImgWrap').style.display='none'
   document.getElementById('spPostModal').style.display='flex'
 }
 
@@ -2866,6 +2873,24 @@ async function spReschedule(){
     spClosePostModal()
     spLoadCalendar()
   }catch(e){toast(e.message,'err')}
+}
+
+// ── Image generation ──
+async function spGenerateImage(){
+  const content=document.getElementById('spModalContent').textContent
+  const plat=document.getElementById('spModalPlat').textContent.toLowerCase()
+  const btn=document.getElementById('spImgBtn')
+  const wrap=document.getElementById('spImgWrap')
+  btn.disabled=true;btn.innerHTML='<span class="spin" style="width:14px;height:14px;display:inline-block"></span> Genererer...'
+  wrap.style.display='none'
+  try{
+    const d=await req('/images/generate',{method:'POST',body:JSON.stringify({content,platform:plat})})
+    document.getElementById('spImgResult').src=d.image
+    document.getElementById('spImgDownload').href=d.image
+    wrap.style.display='block'
+    toast('Bilde generert','ok')
+  }catch(e){toast(e.message||'Bildegenerering feilet','err')}
+  btn.disabled=false;btn.textContent='Generer bilde'
 }
 
 // ── Autopilot (hidden) ──
