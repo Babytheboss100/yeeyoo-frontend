@@ -618,6 +618,8 @@ body::after{
 .sp-wrap{flex:1;overflow-y:auto;padding:24px}
 .sp-step{display:none;animation:fadeIn .3s ease}
 .sp-step.active{display:block}
+.sp-step-center{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center}
+.sp-step-center .sp-card{max-width:600px;width:100%;text-align:left}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .sp-title{font-size:22px;font-weight:800;color:var(--white);margin-bottom:6px}
 .sp-sub{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5}
@@ -1036,12 +1038,12 @@ body::after{
     <div class="tab-panel" id="tab-smartplan">
       <div class="sp-wrap">
         <!-- Step 1: URL Input -->
-        <div class="sp-step active" id="spStep1">
+        <div class="sp-step active sp-step-center" id="spStep1">
           <div class="sp-title">Smart planlegger</div>
-          <div class="sp-sub">Lim inn en URL til bedriftens nettside, og vi analyserer virksomheten og lager en hel maneds innholdsplan automatisk.</div>
+          <div class="sp-sub" style="max-width:500px">Lim inn en URL til bedriftens nettside, og vi analyserer virksomheten og lager en hel maneds innholdsplan automatisk.</div>
 
           <!-- Previous businesses -->
-          <div id="spBizList" class="sp-biz-list" style="display:none"></div>
+          <div id="spBizList" class="sp-biz-list" style="display:none;max-width:600px;width:100%"></div>
 
           <div class="sp-card">
             <div class="sp-card-title">Analyser en nettside</div>
