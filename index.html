@@ -1163,10 +1163,12 @@ body::after{
           <span style="font-size:11px;color:var(--muted)" id="spModalDate">—</span>
           <button class="btn-sec" style="margin-left:auto;font-size:10px;padding:4px 10px" onclick="spClosePostModal()">Lukk</button>
         </div>
-        <div class="sp-post-content" id="spModalContent">—</div>
-        <div id="spImgWrap" style="margin-top:12px;display:none">
-          <img id="spImgResult" style="width:100%;border-radius:var(--r);max-height:300px;object-fit:cover">
-          <a id="spImgDownload" download="yeeyoo-post.webp" style="display:inline-block;margin-top:8px;font-size:12px;font-weight:700;color:var(--blue2);cursor:pointer">Last ned bilde</a>
+        <div style="display:flex;gap:16px;margin-top:12px;align-items:flex-start;flex-wrap:wrap">
+          <div class="sp-post-content" id="spModalContent" style="flex:1;min-width:200px">—</div>
+          <div id="spImgWrap" style="display:none;flex-shrink:0;width:240px">
+            <img id="spImgResult" style="width:240px;max-height:160px;object-fit:cover;border-radius:var(--r);border:1px solid var(--border2)">
+            <a id="spImgDownload" download="yeeyoo-post-image.webp" class="btn-sec" style="display:block;margin-top:6px;font-size:11px;padding:5px 0;text-align:center;text-decoration:none">Last ned bilde</a>
+          </div>
         </div>
         <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
           <button class="btn-sec" id="spImgBtn" onclick="spGenerateImage()" style="font-size:12px;padding:8px 14px">Generer bilde</button>
