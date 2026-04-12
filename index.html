@@ -338,6 +338,61 @@ body::after{
 .qi-meta{font-size:10px;color:var(--muted);margin-top:8px}
 .qi-actions{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap}
 
+/* ── SWIPE UI ── */
+.swipe-overlay{
+  position:fixed;inset:0;z-index:999;
+  background:rgba(5,7,20,.85);backdrop-filter:blur(12px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+.swipe-header{
+  color:var(--white);font-size:14px;font-weight:700;letter-spacing:.5px;
+  margin-bottom:24px;display:flex;align-items:center;gap:10px;
+}
+.swipe-counter{color:var(--muted);font-weight:500}
+.swipe-stack{position:relative;width:420px;max-width:90vw;height:360px}
+.swipe-card{
+  position:absolute;inset:0;
+  background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.03));
+  border:1px solid var(--border2);border-radius:20px;
+  padding:28px 24px;display:flex;flex-direction:column;
+  transition:transform .4s cubic-bezier(.4,.0,.2,1),opacity .4s;
+  cursor:grab;user-select:none;
+}
+.swipe-card.swiped-right{transform:translateX(150%) rotate(15deg);opacity:0}
+.swipe-card.swiped-left{transform:translateX(-150%) rotate(-15deg);opacity:0}
+.swipe-card .sc-plat{
+  display:flex;align-items:center;gap:8px;margin-bottom:14px;
+  font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);
+}
+.swipe-card .sc-plat .plat-dot{width:8px;height:8px;border-radius:50%}
+.swipe-card .sc-body{
+  flex:1;font-size:14px;color:var(--white);line-height:1.7;
+  overflow-y:auto;white-space:pre-wrap;word-break:break-word;
+  font-family:var(--font);
+}
+.swipe-card .sc-ai{
+  margin-top:12px;font-size:10px;color:var(--muted);font-weight:600;
+}
+.swipe-actions{
+  display:flex;align-items:center;gap:20px;margin-top:28px;
+}
+.swipe-btn{
+  width:60px;height:60px;border-radius:50%;border:2px solid;
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;cursor:pointer;transition:all .2s;background:transparent;
+}
+.swipe-btn.skip{border-color:rgba(239,68,68,.4);color:#ef4444}
+.swipe-btn.skip:hover{background:rgba(239,68,68,.15);border-color:#ef4444;transform:scale(1.1)}
+.swipe-btn.edit{border-color:rgba(251,191,36,.4);color:#fbbf24;font-size:18px}
+.swipe-btn.edit:hover{background:rgba(251,191,36,.15);border-color:#fbbf24;transform:scale(1.1)}
+.swipe-btn.approve{border-color:rgba(74,222,128,.4);color:#4ade80}
+.swipe-btn.approve:hover{background:rgba(74,222,128,.15);border-color:#4ade80;transform:scale(1.1)}
+.swipe-close{
+  position:absolute;top:20px;right:24px;
+  background:none;border:none;color:var(--muted);font-size:28px;cursor:pointer;
+}
+.swipe-close:hover{color:var(--white)}
+
 /* ── STATS ── */
 .stats-wrap{flex:1;overflow-y:auto;padding:24px}
 .stats-header{font-size:9px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:18px}
@@ -1607,7 +1662,7 @@ async function generate(){
     // Brief pause to show completion, then render results
     await new Promise(r=>setTimeout(r,600))
     renderResults(r.posts)
-    if(r.errors?.length)toast(`${r.errors.length} feil`,'err');else toast(`${r.posts.length} innlegg generert ✓`,'ok')
+    if(r.errors?.length)toast(`${r.errors.length} feil`,'err');else{toast(`${r.posts.length} innlegg generert ✓`,'ok');if(r.posts.length)openSwipe(r.posts)}
     updateBadge()
   }catch(e){toast(e.message,'err');area.innerHTML=`<div class="empty-state"><div class="es-icon">⚠️</div><div class="es-text">${esc(e.message)}</div></div>`}
   finally{btn.disabled=false;btn.textContent=L('generateBtn');led.className='led ok';document.getElementById('ledTxt').textContent=L('ready');setTimeout(()=>{led.className='led'},3000)}
@@ -1733,6 +1788,59 @@ function renderResults(posts){
 function updCC(id){const b=document.getElementById('body-'+id),c=document.getElementById('cc-'+id);if(b&&c)c.textContent=b.innerText.length+' tegn'}
 async function approvePost(id){try{await req('/content/posts/'+id,{method:'PATCH',body:JSON.stringify({status:'approved'})});document.querySelector('[data-id="'+id+'"]')?.classList.add('approved');toast('Godkjent ✓','ok');updateBadge()}catch(e){toast(e.message,'err')}}
 async function copyPost(id){const b=document.getElementById('body-'+id);if(b){await navigator.clipboard.writeText(b.innerText);toast('Kopiert ✓','ok')}}
+// ── SWIPE UI ──
+let swipePosts=[], swipeIdx=0;
+function openSwipe(posts){
+  swipePosts=posts;swipeIdx=0;
+  const overlay=document.createElement('div');overlay.className='swipe-overlay';overlay.id='swipeOverlay';
+  overlay.innerHTML=`
+    <button class="swipe-close" onclick="closeSwipe()">✕</button>
+    <div class="swipe-header">Ny innhold <span class="swipe-counter" id="swipeCtr">${swipeIdx+1}/${swipePosts.length}</span></div>
+    <div class="swipe-stack" id="swipeStack"></div>
+    <div class="swipe-actions">
+      <button class="swipe-btn skip" onclick="swipeAction('skip')" title="Forkast">✕</button>
+      <button class="swipe-btn edit" onclick="swipeAction('edit')" title="Rediger">✎</button>
+      <button class="swipe-btn approve" onclick="swipeAction('approve')" title="Godkjenn">✓</button>
+    </div>`;
+  document.body.appendChild(overlay);
+  renderSwipeCard();
+}
+function closeSwipe(){const o=document.getElementById('swipeOverlay');if(o)o.remove()}
+function renderSwipeCard(){
+  const stack=document.getElementById('swipeStack');if(!stack)return;
+  if(swipeIdx>=swipePosts.length){stack.innerHTML='<div style="text-align:center;color:var(--muted);padding-top:100px"><div style="font-size:48px;margin-bottom:16px">✅</div><div style="font-size:16px;font-weight:600;color:var(--white)">Alle gjennomgått!</div></div>';return}
+  const p=swipePosts[swipeIdx];
+  const dc={linkedin:'dot-linkedin',facebook:'dot-facebook',instagram:'dot-instagram',twitter:'dot-twitter'};
+  const aiLabels={claude:'Claude',gpt4o:'GPT-4o',gemini:'Gemini',grok:'Grok',deepseek:'DeepSeek'};
+  stack.innerHTML=`<div class="swipe-card" id="swipeCard">
+    <div class="sc-plat"><div class="plat-dot ${dc[p.platform]||''}"></div>${p.platform}</div>
+    <div class="sc-body">${esc(p.content)}</div>
+    <div class="sc-ai">${aiLabels[p.ai_model]||p.ai_model||'AI'} · ${p.content.length} tegn</div>
+  </div>`;
+  document.getElementById('swipeCtr').textContent=(swipeIdx+1)+'/'+swipePosts.length;
+  // Touch swipe
+  let startX=0,dx=0;const card=document.getElementById('swipeCard');
+  card.addEventListener('touchstart',e=>{startX=e.touches[0].clientX});
+  card.addEventListener('touchmove',e=>{dx=e.touches[0].clientX-startX;card.style.transform='translateX('+dx+'px) rotate('+(dx*0.05)+'deg)';card.style.transition='none'});
+  card.addEventListener('touchend',()=>{card.style.transition='';if(dx>80)swipeAction('approve');else if(dx<-80)swipeAction('skip');else card.style.transform=''});
+}
+async function swipeAction(action){
+  const card=document.getElementById('swipeCard');
+  if(!card||swipeIdx>=swipePosts.length)return;
+  const p=swipePosts[swipeIdx];
+  if(action==='approve'){
+    card.classList.add('swiped-right');
+    try{await req('/content/posts/'+p.id,{method:'PATCH',body:JSON.stringify({status:'approved'})});toast('Godkjent ✓','ok');updateBadge()}catch(e){toast(e.message,'err')}
+  } else if(action==='skip'){
+    card.classList.add('swiped-left');
+    try{await req('/content/posts/'+p.id,{method:'DELETE'});toast('Forkastet','info')}catch(e){}
+  } else if(action==='edit'){
+    closeSwipe();showTab('queue');loadQueue();
+    return;
+  }
+  setTimeout(()=>{swipeIdx++;renderSwipeCard()},400);
+}
+
 async function regenPost(id,platform){
   toast('Regenererer...','info')
   try{
