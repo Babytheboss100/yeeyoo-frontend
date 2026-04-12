@@ -235,6 +235,44 @@ body::after{
 .es-icon{font-size:48px;opacity:.2}
 .es-text{font-size:15px;font-weight:600;color:var(--muted)}
 .es-sub{font-size:12px;color:var(--muted2)}
+/* ── CONTENT TYPE TAG ── */
+.ct-tag{
+  display:inline-block;padding:2px 8px;border-radius:4px;font-size:9px;
+  font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-left:auto;
+}
+.ct-mythbuster{background:rgba(239,68,68,.15);color:#ef4444}
+.ct-before-after{background:rgba(251,191,36,.15);color:#fbbf24}
+.ct-problem-solution{background:rgba(74,222,128,.15);color:#4ade80}
+.ct-statistics{background:rgba(79,127,255,.15);color:#4f7fff}
+.ct-faq{background:rgba(168,85,247,.15);color:#a855f7}
+.ct-testimonial{background:rgba(236,72,153,.15);color:#ec4899}
+.ct-features{background:rgba(45,212,191,.15);color:#2dd4bf}
+.ct-general{background:rgba(148,163,184,.15);color:var(--muted)}
+
+/* ── BRAND DNA ── */
+.brand-dna{
+  background:linear-gradient(145deg,rgba(124,58,237,.08),rgba(79,127,255,.06));
+  border:1px solid rgba(124,58,237,.2);border-radius:var(--r2);
+  padding:20px;margin-bottom:20px;
+}
+.brand-dna h3{font-size:13px;font-weight:700;color:var(--white);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.dna-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dna-item{background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px}
+.dna-label{font-size:9px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
+.dna-val{font-size:12px;color:var(--white);line-height:1.5}
+
+/* ── DAILY IDEAS ── */
+.ideas-section{margin-bottom:20px}
+.ideas-header{font-size:13px;font-weight:700;color:var(--white);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.idea-card{
+  background:linear-gradient(145deg,rgba(251,191,36,.06),rgba(255,255,255,.03));
+  border:1px solid rgba(251,191,36,.15);border-radius:10px;
+  padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:all .2s;
+}
+.idea-card:hover{border-color:rgba(251,191,36,.4);transform:translateX(4px)}
+.idea-title{font-size:12px;font-weight:700;color:#fbbf24;margin-bottom:4px}
+.idea-desc{font-size:11px;color:var(--muted);line-height:1.5}
+
 .result-card{
   background:linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.03));
   border:1px solid var(--border2);border-radius:var(--r2);overflow:hidden;transition:border-color .2s;
@@ -894,6 +932,23 @@ body::after{
               <button class="gen-btn" id="genBtn" onclick="generate()">▶ Generer</button>
             </div>
           </div>
+          <!-- BRAND DNA -->
+          <div class="brand-dna" id="brandDna" style="display:none">
+            <h3>🧬 Brand DNA</h3>
+            <div class="dna-grid">
+              <div class="dna-item"><div class="dna-label">Tone</div><div class="dna-val" id="dnaTone">—</div></div>
+              <div class="dna-item"><div class="dna-label">Målgruppe</div><div class="dna-val" id="dnaAudience">—</div></div>
+              <div class="dna-item"><div class="dna-label">Styrker</div><div class="dna-val" id="dnaStrengths">—</div></div>
+              <div class="dna-item"><div class="dna-label">Innholdspilarer</div><div class="dna-val" id="dnaPillars">—</div></div>
+            </div>
+          </div>
+
+          <!-- DAILY IDEAS -->
+          <div class="ideas-section" id="dailyIdeas" style="display:none">
+            <div class="ideas-header">💡 Dagens idéer</div>
+            <div id="ideasList"></div>
+          </div>
+
           <div class="results-area" id="resultsArea">
             <div class="empty-state">
               <div class="es-icon">⚡</div>
@@ -1624,11 +1679,16 @@ async function loadProjects(){
   try{
     projects=await req('/projects')
     if(!projects.length){const sf=await req('/projects',{method:'POST',body:JSON.stringify({name:'Min bedrift',color:'#4f7fff',about:'Beskriv bedriften din her',audience:'Din målgruppe',tone:'Profesjonell og engasjerende',keywords:'produkt, tjeneste, bransje'})});projects=[sf];toast('Standardprosjekt opprettet ✓','ok')}
-    currentProjectId=projects[0].id;renderProjSel();renderProjList()
+    currentProjectId=projects[0].id;renderProjSel();renderProjList();showBrandDna(projects[0]);showDailyIdeas()
   }catch(e){console.error(e)}
 }
 function renderProjSel(){const s=document.getElementById('projSel');s.innerHTML=projects.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');s.value=currentProjectId||''}
-function switchProject(id){currentProjectId=id}
+function switchProject(id){
+  currentProjectId=id;
+  const proj=projects.find(p=>p.id===id);
+  showBrandDna(proj);
+  showDailyIdeas();
+}
 function renderProjList(){
   const el=document.getElementById('projList');if(!el)return
   el.innerHTML=projects.map(p=>`<div class="proj-row"><div class="proj-color" style="background:${p.color}"></div><div style="flex:1"><div class="proj-name">${p.name}</div><div class="proj-aud">${p.audience||'—'}</div></div><button class="rbtn del" onclick="delProj('${p.id}')">${L('delete')}</button></div>`).join('')
@@ -1753,6 +1813,65 @@ async function copyImageToClipboard(url){
   }
 }
 
+// ── CONTENT TYPE DETECTION ──
+const CONTENT_TYPES = [
+  {id:'mythbuster',cls:'ct-mythbuster',label:'Mythbuster',keywords:['myte','tror du','sannhet','faktisk','feil','misforstå','myth']},
+  {id:'before-after',cls:'ct-before-after',label:'Before & After',keywords:['før','etter','before','after','endring','transformasjon','resultat']},
+  {id:'problem-solution',cls:'ct-problem-solution',label:'Problem-Solution',keywords:['problem','løsning','utfordring','slik','hvordan','løser','solution']},
+  {id:'statistics',cls:'ct-statistics',label:'Statistics',keywords:['%','prosent','tall','studie','undersøkelse','statistikk','data','rapport']},
+  {id:'faq',cls:'ct-faq',label:'FAQ',keywords:['spørsmål','svar','faq','lurer','vanlig','ofte stilte']},
+  {id:'testimonial',cls:'ct-testimonial',label:'Testimonial',keywords:['kunde','erfaring','anbefale','fornøyd','resultat','tilbakemelding','sa']},
+  {id:'features',cls:'ct-features',label:'Features',keywords:['funksjon','feature','nyhet','lansering','oppdatering','ny','introduserer']}
+];
+function detectContentType(text){
+  const lower=text.toLowerCase();
+  let best=null,bestScore=0;
+  CONTENT_TYPES.forEach(ct=>{
+    let score=0;
+    ct.keywords.forEach(kw=>{if(lower.includes(kw))score++});
+    if(score>bestScore){bestScore=score;best=ct}
+  });
+  return bestScore>=1?best:{id:'general',cls:'ct-general',label:'Generelt'};
+}
+
+// ── BRAND DNA ──
+function showBrandDna(project){
+  const el=document.getElementById('brandDna');
+  if(!project||!project.tone){el.style.display='none';return}
+  document.getElementById('dnaTone').textContent=project.tone||'—';
+  document.getElementById('dnaAudience').textContent=project.audience||'—';
+  document.getElementById('dnaStrengths').textContent=project.keywords||'—';
+  document.getElementById('dnaPillars').textContent=project.about?project.about.substring(0,120)+'..':'—';
+  el.style.display='block';
+}
+
+// ── DAILY IDEAS ──
+const IDEA_TEMPLATES=[
+  {title:'Mythbuster Monday',desc:'Avkreft en vanlig myte i bransjen din med fakta og tall.'},
+  {title:'Kundehistorie',desc:'Del en ekte suksesshistorie fra en fornøyd kunde.'},
+  {title:'Behind the Scenes',desc:'Vis hva som skjer bak kulissene i bedriften.'},
+  {title:'Statistikk-post',desc:'Del en overraskende statistikk relevant for målgruppen.'},
+  {title:'Tips & Triks',desc:'Del 3 praktiske tips publikummet kan bruke med en gang.'},
+  {title:'Før vs. Etter',desc:'Vis en transformasjon — resultat av produktet/tjenesten din.'},
+  {title:'FAQ Friday',desc:'Svar på det vanligste spørsmålet du får fra kunder.'},
+  {title:'Bransjetrend',desc:'Kommenter en aktuell trend og hva den betyr for kundene dine.'},
+  {title:'Teamet bak',desc:'Presenter et teammedlem og hva de jobber med.'},
+];
+function showDailyIdeas(){
+  const el=document.getElementById('dailyIdeas');
+  const list=document.getElementById('ideasList');
+  // Pick 3 based on day of year for consistency
+  const doy=Math.floor((Date.now()-new Date(new Date().getFullYear(),0,0))/86400000);
+  const ideas=[];
+  for(let i=0;i<3;i++){ideas.push(IDEA_TEMPLATES[(doy+i*3)%IDEA_TEMPLATES.length])}
+  list.innerHTML=ideas.map(idea=>`
+    <div class="idea-card" onclick="document.getElementById('customPrompt').value='${idea.desc}';document.getElementById('customPrompt').focus()">
+      <div class="idea-title">${idea.title}</div>
+      <div class="idea-desc">${idea.desc}</div>
+    </div>`).join('');
+  el.style.display='block';
+}
+
 function renderResults(posts){
   const area=document.getElementById('resultsArea');if(!posts.length)return
   const dc={linkedin:'dot-linkedin',facebook:'dot-facebook',instagram:'dot-instagram',twitter:'dot-twitter'}
@@ -1762,6 +1881,7 @@ function renderResults(posts){
   area.innerHTML=posts.map(p=>{
     const aiColor=aiColors[p.ai_model]||'var(--muted2)'
     const aiLabel=aiLabels[p.ai_model]||p.ai_model||'AI'
+    const ct=detectContentType(p.content)
     return `
     <div class="result-card" data-id="${p.id}">
       <div class="rc-head">
@@ -1771,6 +1891,7 @@ function renderResults(posts){
           <div style="width:6px;height:6px;border-radius:50%;background:${aiColor}"></div>
           ${aiLabel}
         </div>
+        <span class="ct-tag ${ct.cls}">${ct.label}</span>
         <div class="rc-chars" id="cc-${p.id}">${p.content.length} tegn</div>
       </div>
       <div class="rc-body" id="body-${p.id}" contenteditable="true" oninput="updCC('${p.id}')">${esc(p.content)}</div>
@@ -1812,8 +1933,9 @@ function renderSwipeCard(){
   const p=swipePosts[swipeIdx];
   const dc={linkedin:'dot-linkedin',facebook:'dot-facebook',instagram:'dot-instagram',twitter:'dot-twitter'};
   const aiLabels={claude:'Claude',gpt4o:'GPT-4o',gemini:'Gemini',grok:'Grok',deepseek:'DeepSeek'};
+  const ct=detectContentType(p.content);
   stack.innerHTML=`<div class="swipe-card" id="swipeCard">
-    <div class="sc-plat"><div class="plat-dot ${dc[p.platform]||''}"></div>${p.platform}</div>
+    <div class="sc-plat"><div class="plat-dot ${dc[p.platform]||''}"></div>${p.platform}<span class="ct-tag ${ct.cls}" style="margin-left:auto">${ct.label}</span></div>
     <div class="sc-body">${esc(p.content)}</div>
     <div class="sc-ai">${aiLabels[p.ai_model]||p.ai_model||'AI'} · ${p.content.length} tegn</div>
   </div>`;
