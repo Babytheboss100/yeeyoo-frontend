@@ -375,7 +375,7 @@ body::after{
 .qs-published{background:rgba(79,127,255,.12);color:var(--blue2)}
 .qi-body{flex:1}
 .qi-proj-tag{display:inline-block;font-size:9px;font-weight:700;padding:2px 8px;border-radius:4px;color:#fff;margin-bottom:8px}
-.qi-text{font-size:13px;color:var(--white);line-height:1.6;white-space:pre-wrap;word-break:break-word}  /* white */
+.qi-text{font-size:13px;color:var(--white);line-height:1.6;white-space:pre-wrap;word-break:break-word;max-height:200px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent}
 .qi-meta{font-size:10px;color:var(--muted);margin-top:8px}
 .qi-actions{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap}
 
@@ -390,7 +390,7 @@ body::after{
   margin-bottom:24px;display:flex;align-items:center;gap:10px;
 }
 .swipe-counter{color:var(--muted);font-weight:500}
-.swipe-stack{position:relative;width:420px;max-width:90vw;height:360px}
+.swipe-stack{position:relative;width:420px;max-width:90vw;height:440px}
 .swipe-card{
   position:absolute;inset:0;
   background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.03));
@@ -408,8 +408,9 @@ body::after{
 .swipe-card .sc-plat .plat-dot{width:8px;height:8px;border-radius:50%}
 .swipe-card .sc-body{
   flex:1;font-size:14px;color:var(--white);line-height:1.7;
-  overflow-y:auto;white-space:pre-wrap;word-break:break-word;
-  font-family:var(--font);
+  overflow-y:scroll;white-space:pre-wrap;word-break:break-word;
+  font-family:var(--font);max-height:260px;
+  scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.15) transparent;
 }
 .swipe-card .sc-ai{
   margin-top:12px;font-size:10px;color:var(--muted);font-weight:600;
@@ -2080,7 +2081,7 @@ function openSwipe(posts){
 function closeSwipe(){const o=document.getElementById('swipeOverlay');if(o)o.remove()}
 function renderSwipeCard(){
   const stack=document.getElementById('swipeStack');if(!stack)return;
-  if(swipeIdx>=swipePosts.length){stack.innerHTML='<div style="text-align:center;color:var(--muted);padding-top:100px"><div style="font-size:48px;margin-bottom:16px">✅</div><div style="font-size:16px;font-weight:600;color:var(--white)">Alle gjennomgått!</div></div>';return}
+  if(swipeIdx>=swipePosts.length){stack.innerHTML='<div style="text-align:center;color:var(--muted);padding-top:100px"><div style="font-size:48px;margin-bottom:16px">✅</div><div style="font-size:16px;font-weight:600;color:var(--white)">Alle gjennomgått!</div></div>';setTimeout(()=>{closeSwipe();loadQueue();updateBadge()},1500);return}
   const p=swipePosts[swipeIdx];
   const dc={linkedin:'dot-linkedin',facebook:'dot-facebook',instagram:'dot-instagram',twitter:'dot-twitter',email:'dot-email'};
   const aiLabels={claude:'Claude',gpt4o:'GPT-4o',gemini:'Gemini',grok:'Grok',deepseek:'DeepSeek'};
@@ -2088,7 +2089,10 @@ function renderSwipeCard(){
   stack.innerHTML=`<div class="swipe-card" id="swipeCard">
     <div class="sc-plat"><div class="plat-dot ${dc[p.platform]||''}"></div>${p.platform}<span class="ct-tag ${ct.cls}" style="margin-left:auto">${ct.label}</span></div>
     <div class="sc-body">${esc(p.content)}</div>
-    <div class="sc-ai">${aiLabels[p.ai_model]||p.ai_model||'AI'} · ${p.content.length} tegn</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px">
+      <div class="sc-ai" style="margin:0">${aiLabels[p.ai_model]||p.ai_model||'AI'} · ${p.content.length} tegn</div>
+      <button class="rbtn img" onclick="event.stopPropagation();closeSwipe();genImage('${p.id}')" style="font-size:12px;padding:4px 10px;color:var(--blue2)">🖼 Generer bilde</button>
+    </div>
   </div>`;
   document.getElementById('swipeCtr').textContent=(swipeIdx+1)+'/'+swipePosts.length;
   // Touch swipe — require 50px drag before activating
