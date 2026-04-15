@@ -1622,7 +1622,11 @@ async function req(path,opts={}){
   const h={'Content-Type':'application/json'}
   if(token)h['Authorization']='Bearer '+token
   const r=await fetch(API+path,{...opts,headers:{...h,...(opts.headers||{})}})
-  const d=await r.json();if(!r.ok)throw new Error(d.error||'Feil');return d
+  const text=await r.text()
+  let d
+  try{d=text?JSON.parse(text):{}}catch{d={error:'Ugyldig respons fra server'}}
+  if(!r.ok)throw new Error(d.error||'Feil ('+r.status+')')
+  return d
 }
 function hideLoading(){const l=document.getElementById('loadingScreen');if(l)l.style.display='none'}
 function showAuth(){hideLoading();document.getElementById('authWrap').style.display='flex';document.getElementById('app').style.display='none'}
@@ -2711,7 +2715,7 @@ async function obComplete(){
 // ─── INDUSTRY TEMPLATES ──────────────────────────────────────────────────────
 let industryTemplates=[]
 async function loadIndustryTemplates(){
-  try{industryTemplates=await req('/content/industry-templates');renderIndTemplates()}catch{}
+  try{industryTemplates=await req('/content/industry-templates');renderIndTemplates()}catch(e){console.error('Industry templates load failed:',e.message)}
 }
 function renderIndTemplates(){
   const el=document.getElementById('indTemplateGrid');if(!el)return
@@ -2731,8 +2735,8 @@ async function applyIndustryTemplate(id){
       const idx=projects.findIndex(p=>p.id===currentProjectId)
       if(idx>=0)Object.assign(projects[idx],{tone:t.tone,audience:t.audience,keywords:t.keywords,about:t.about,color:t.color})
       toast(`Bransjemal "${t.name}" brukt ✓`,'ok')
-    }catch(e){toast(e.message,'err')}
-  }
+    }catch(e){toast('Kunne ikke bruke bransjemal: '+e.message,'err')}
+  }else{toast('Opprett et prosjekt først','err');return}
   // Highlight card
   document.querySelectorAll('.ind-card').forEach(c=>c.classList.remove('active'))
   document.querySelector(`.ind-card[onclick*="${id}"]`)?.classList.add('active')
