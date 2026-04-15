@@ -2087,11 +2087,11 @@ function renderSwipeCard(){
     <div class="sc-ai">${aiLabels[p.ai_model]||p.ai_model||'AI'} · ${p.content.length} tegn</div>
   </div>`;
   document.getElementById('swipeCtr').textContent=(swipeIdx+1)+'/'+swipePosts.length;
-  // Touch swipe
-  let startX=0,dx=0;const card=document.getElementById('swipeCard');
-  card.addEventListener('touchstart',e=>{startX=e.touches[0].clientX});
-  card.addEventListener('touchmove',e=>{dx=e.touches[0].clientX-startX;card.style.transform='translateX('+dx+'px) rotate('+(dx*0.05)+'deg)';card.style.transition='none'});
-  card.addEventListener('touchend',()=>{card.style.transition='';if(dx>80)swipeAction('approve');else if(dx<-80)swipeAction('skip');else card.style.transform=''});
+  // Touch swipe — require 50px drag before activating
+  let startX=0,dx=0,swiping=false;const card=document.getElementById('swipeCard');
+  card.addEventListener('touchstart',e=>{startX=e.touches[0].clientX;dx=0;swiping=false});
+  card.addEventListener('touchmove',e=>{dx=e.touches[0].clientX-startX;if(Math.abs(dx)>=50)swiping=true;if(swiping){card.style.transform='translateX('+dx+'px) rotate('+(dx*0.05)+'deg)';card.style.transition='none'}});
+  card.addEventListener('touchend',()=>{card.style.transition='';if(swiping&&dx>80)swipeAction('approve');else if(swiping&&dx<-80)swipeAction('skip');else{card.style.transform=''}dx=0;swiping=false});
 }
 async function swipeAction(action){
   const card=document.getElementById('swipeCard');
