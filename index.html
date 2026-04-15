@@ -1763,15 +1763,23 @@ async function genImage(postId){
   const imgArea=document.getElementById('img-'+postId)
   const body=document.getElementById('body-'+postId)
   if(!body)return
+  const card=document.querySelector('[data-id="'+postId+'"]')
+  const platform=card?.querySelector('.plat-name')?.textContent||'linkedin'
+  const projName=projects.find(p=>p.id===currentProjectId)?.name||''
   btn.classList.add('loading');btn.textContent='⏳ Genererer...'
   imgArea.style.display='block'
   imgArea.innerHTML=`<div class="rc-image-loading"><div class="spin-img"></div><span>Genererer bilde...</span></div>`
 
   try{
-    const text=body.innerText.substring(0,200)
-    const d=await req('/content/generate-image',{method:'POST',body:JSON.stringify({postId,text,projectId:currentProjectId})})
-    if(!d.url)throw new Error('Ingen URL')
-    await loadImgWithFallback(d.url,postId,imgArea,btn)
+    const text=body.innerText.substring(0,500)
+    const d=await req('/images/branded',{method:'POST',body:JSON.stringify({postId,text,platform,projectName:projName})})
+    if(!d.image)throw new Error('Ingen bilde')
+    imgArea.innerHTML=`<img src="${d.image}" alt="Generert bilde" style="width:100%;display:block;border-radius:10px"/>
+      <div class="rc-image-actions">
+        <a href="${d.image}" download="yeeyoo-${postId}.png" class="rbtn" style="color:var(--ok)">⬇ Last ned</a>
+        <button class="rbtn" onclick="navigator.clipboard.writeText(this.parentElement.previousElementSibling.src);toast('Bilde-URL kopiert','ok')">📋 Kopier</button>
+      </div>`
+    btn.textContent='🖼 Generer bilde';btn.classList.remove('loading')
   }catch(e){showImgError(postId,imgArea,btn,e.message)}
 }
 
@@ -1934,7 +1942,7 @@ function renderResults(posts){
         <button class="rbtn regen" onclick="regenPost('${p.id}','${p.platform}')">↻ Regenerer</button>
         <button class="rbtn del" onclick="delPost('${p.id}')">✕</button>
       </div>
-      <div class="rc-image" id="img-${p.id}" style="display:none"></div>
+      <div class="rc-image" id="img-${p.id}" style="${p.image_url?'display:block':'display:none'}">${p.image_url?`<img src="${p.image_url}" alt="Generert bilde" style="width:100%;display:block;border-radius:10px"/><div class="rc-image-actions"><a href="${p.image_url}" download="yeeyoo-${p.id}.png" class="rbtn" style="color:var(--ok)">⬇ Last ned</a></div>`:''}</div>
     </div>`}).join('')
 }
 function updCC(id){const b=document.getElementById('body-'+id),c=document.getElementById('cc-'+id);if(b&&c)c.textContent=b.innerText.length+' tegn'}
@@ -2019,6 +2027,7 @@ function renderQueue(){
       <div class="qi-body">
         ${p.project_name?`<div class="qi-proj-tag" style="background:${p.project_color||'var(--blue)'}">${p.project_name}</div>`:''}
         <div class="qi-text">${esc(p.content.substring(0,280))}${p.content.length>280?'...':''}</div>
+        ${p.image_url?`<img src="${p.image_url}" alt="" style="width:100%;max-width:320px;border-radius:8px;margin:8px 0;display:block">`:''}
         <div class="qi-meta">${new Date(p.created_at).toLocaleString('no-NO')}</div>
         ${p.scheduled_at?`<div class="qi-meta" style="color:var(--blue2)">📅 Planlagt: ${new Date(p.scheduled_at).toLocaleString('no-NO')}</div>`:''}
         <div class="qi-actions">
