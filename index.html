@@ -821,10 +821,21 @@ body::after{
   <div class="auth-box" style="text-align:center">
     <div style="font-size:48px;margin-bottom:16px">🔒</div>
     <div style="font-size:20px;font-weight:800;color:var(--white);margin-bottom:8px">Lukket beta</div>
-    <p style="color:var(--muted);font-size:14px;margin-bottom:24px;line-height:1.6">
-      Yeeyoo er i lukket beta. Legg igjen e-posten din så sender vi deg en invitasjon når plassen din er klar.
+    <p style="color:var(--muted);font-size:14px;margin-bottom:20px;line-height:1.6">
+      Yeeyoo er i lukket beta. Har du en invitasjonskode? Skriv den inn under.
     </p>
     <div class="auth-err" id="betaMsg" style="display:none"></div>
+    <div class="auth-field">
+      <label class="auth-label">Invitasjonskode</label>
+      <input class="auth-input" id="betaInviteCode" placeholder="YEEYOO-XXXX" style="text-transform:uppercase;letter-spacing:2px;text-align:center;font-weight:700">
+    </div>
+    <button class="auth-btn" onclick="verifyInviteCode()" id="betaCodeBtn" style="margin-bottom:12px">Bruk kode →</button>
+    <div style="display:flex;align-items:center;gap:12px;margin:16px 0 14px">
+      <div style="flex:1;height:1px;background:var(--border2)"></div>
+      <span style="font-size:11px;color:var(--muted2);font-weight:600">ELLER</span>
+      <div style="flex:1;height:1px;background:var(--border2)"></div>
+    </div>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:16px">Ingen kode? Søk om tilgang — vi sender en invitasjon når plassen din er klar.</p>
     <div class="auth-field">
       <label class="auth-label">E-post</label>
       <input class="auth-input" id="betaEmail" placeholder="din@epost.no" type="email">
@@ -833,7 +844,7 @@ body::after{
       <label class="auth-label">Melding</label>
       <textarea class="auth-input" id="betaMessage" placeholder="Fortell oss litt om deg og bedriften din..." rows="3" style="resize:none;line-height:1.5"></textarea>
     </div>
-    <button class="auth-btn" onclick="requestBetaAccess()" id="betaBtn">Søk om tilgang →</button>
+    <button class="auth-btn" onclick="requestBetaAccess()" id="betaBtn" style="background:var(--navy3);border:1px solid var(--border2);box-shadow:none">Søk om tilgang →</button>
     <div class="auth-toggle" onclick="closeBetaGate()" style="margin-top:16px">Har du allerede tilgang? <span>Logg inn</span></div>
   </div>
 </div>
@@ -1647,7 +1658,7 @@ async function doAuth(){
   const errEl=document.getElementById('authErr');errEl.style.display='none'
   document.getElementById('authBtn').innerHTML='<span class="spin"></span>'
   try{
-    const b=authMode==='register'?{name,email,password:pass}:{email,password:pass}
+    const b=authMode==='register'?{name,email,password:pass,inviteCode:verifiedInviteCode||undefined}:{email,password:pass}
     const d=await req('/auth/'+(authMode==='register'?'register':'login'),{method:'POST',body:JSON.stringify(b)})
 
     if(d.needsVerification){
@@ -1686,6 +1697,29 @@ function showBetaGate(){
 function closeBetaGate(){
   document.getElementById('betaGate').style.display='none'
   document.getElementById('authWrap').style.display='flex'
+}
+let verifiedInviteCode=null
+async function verifyInviteCode(){
+  const code=document.getElementById('betaInviteCode').value.trim()
+  if(!code){toast('Skriv inn invitasjonskode','err');return}
+  const btn=document.getElementById('betaCodeBtn');btn.disabled=true;btn.innerHTML='<span class="spin"></span>'
+  try{
+    const d=await req('/auth/verify-invite',{method:'POST',body:JSON.stringify({code})})
+    if(d.valid){
+      verifiedInviteCode=d.code
+      toast('Kode godkjent! Registrer deg nå.','ok')
+      closeBetaGate()
+      authMode='register'
+      document.getElementById('nameField').style.display='block'
+      document.getElementById('authBtn').textContent=L('authRegister')
+      document.getElementById('authToggle').innerHTML=`${L('authHasAccount')} <span>${L('authLoginLink')}</span>`
+    }
+  }catch(e){
+    const msg=document.getElementById('betaMsg')
+    msg.style.display='block';msg.style.background='rgba(248,113,113,.1)';msg.style.borderColor='rgba(248,113,113,.3)';msg.style.color='#f87171'
+    msg.textContent=e.message||'Ugyldig kode'
+    btn.disabled=false;btn.textContent='Bruk kode →'
+  }
 }
 async function requestBetaAccess(){
   const email=document.getElementById('betaEmail').value.trim()
