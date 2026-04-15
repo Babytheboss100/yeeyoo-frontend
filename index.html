@@ -854,6 +854,7 @@ body::after{
       <div class="tb-tab" onclick="showTab('stats')" data-tab="stats">📊 Statistikk</div>
       <div class="tb-tab" onclick="showTab('seo')" data-tab="seo">🔍 SEO</div>
       <div class="tb-tab" onclick="showTab('smartplan')" data-tab="smartplan">🧠 Smart planlegger</div>
+      <div class="tb-tab" onclick="showTab('campaigns')" data-tab="campaigns">📨 Kampanjer</div>
       <div class="tb-tab" onclick="showTab('settings')" data-tab="settings">⚙ Innstillinger</div>
     </div>
     <div class="tb-right">
@@ -1467,6 +1468,54 @@ body::after{
   </div>
 </div>
 
+    <!-- ─── CAMPAIGNS TAB ──────────────────────────────────────────────── -->
+    <div class="tab-panel" id="tab-campaigns">
+      <div style="max-width:800px;margin:30px auto;padding:0 20px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+          <div>
+            <div style="font-size:20px;font-weight:800;color:var(--white)">📨 E-postkampanjer</div>
+            <div style="font-size:13px;color:var(--muted);margin-top:4px">Opprett og send kampanjer med åpnings- og klikksporing</div>
+          </div>
+          <button class="btn-pri" onclick="openCampaignModal()">+ Ny kampanje</button>
+        </div>
+
+        <div id="campaignList" style="display:flex;flex-direction:column;gap:12px">
+          <div style="text-align:center;color:var(--muted);padding:40px;font-size:14px">Laster kampanjer...</div>
+        </div>
+      </div>
+
+      <!-- Campaign modal -->
+      <div id="campaignModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center">
+        <div style="background:var(--navy2);border:1px solid var(--border2);border-radius:var(--r-lg);padding:32px;width:560px;max-height:90vh;overflow-y:auto">
+          <div style="font-size:18px;font-weight:800;color:var(--white);margin-bottom:20px">Ny kampanje</div>
+          <div class="auth-field">
+            <label class="auth-label">Navn</label>
+            <input class="fld-input" id="campName" placeholder="f.eks. Lanseringsmail mai 2026">
+          </div>
+          <div class="auth-field">
+            <label class="auth-label">Emne</label>
+            <input class="fld-input" id="campSubject" placeholder="E-postemne">
+          </div>
+          <div class="auth-field">
+            <label class="auth-label">HTML-innhold</label>
+            <textarea class="fld-input" id="campHtml" rows="10" placeholder="<h1>Hei!</h1><p>..." style="font-family:monospace;font-size:12px;resize:vertical;line-height:1.5"></textarea>
+          </div>
+          <div class="auth-field">
+            <label class="auth-label">Mottakere (komma-separert)</label>
+            <textarea class="fld-input" id="campRecipients" rows="3" placeholder="bruker1@epost.no, bruker2@epost.no" style="resize:vertical"></textarea>
+          </div>
+          <div class="auth-field">
+            <label class="auth-label">Planlagt sending (valgfritt)</label>
+            <input class="fld-input" id="campSchedule" type="datetime-local">
+          </div>
+          <div style="display:flex;gap:10px;margin-top:16px">
+            <button class="btn-pri" onclick="createCampaign()" id="campCreateBtn" style="flex:1">Opprett kampanje</button>
+            <button class="btn-sec" onclick="closeCampaignModal()">Avbryt</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="tab-panel" id="tab-autopilot">
       <div style="max-width:640px;margin:40px auto;padding:0 20px">
         <div style="margin-bottom:24px">
@@ -1676,12 +1725,71 @@ async function showApp(){
     setTimeout(()=>checkout(plan),1500)
   }
 }
+// ─── CAMPAIGNS ────────────────────────────────────────────────────────────────
+async function loadCampaigns(){
+  const el=document.getElementById('campaignList')
+  try{
+    const camps=await req('/campaigns')
+    if(!camps.length){el.innerHTML='<div style="text-align:center;color:var(--muted);padding:40px;font-size:14px">Ingen kampanjer ennå. Klikk «Ny kampanje» for å starte.</div>';return}
+    el.innerHTML=camps.map(c=>{
+      const s=c.stats||{}
+      const statusColor=c.status==='sent'?'var(--ok)':c.status==='scheduled'?'var(--blue)':'var(--muted)'
+      const statusLabel=c.status==='sent'?'Sendt':c.status==='scheduled'?'Planlagt':'Utkast'
+      return `<div style="background:var(--navy2);border:1px solid var(--border2);border-radius:var(--r);padding:16px 20px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div style="font-size:15px;font-weight:700;color:var(--white)">${esc(c.name)}</div>
+          <span style="font-size:11px;font-weight:700;color:${statusColor};text-transform:uppercase">${statusLabel}</span>
+        </div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Emne: ${esc(c.subject)}</div>
+        <div style="display:flex;gap:16px;font-size:12px;color:var(--muted2)">
+          <span>👥 ${c.recipient_count||0} mottakere</span>
+          <span>📬 ${s.totalOpens||0} åpninger</span>
+          <span>🔗 ${s.totalClicks||0} klikk</span>
+          <span>📊 ${s.openRate||0}% åpningsrate</span>
+        </div>
+        ${c.status==='draft'?`<button class="btn-pri" style="margin-top:12px;font-size:12px;padding:6px 16px" onclick="sendCampaign('${c.id}')">Send nå →</button>`:''}
+      </div>`
+    }).join('')
+  }catch(e){el.innerHTML=`<div style="color:var(--hot);font-size:13px">Feil: ${e.message}</div>`}
+}
+function esc(s){return s?s.replace(/</g,'&lt;').replace(/>/g,'&gt;'):''}
+function openCampaignModal(){document.getElementById('campaignModal').style.display='flex'}
+function closeCampaignModal(){document.getElementById('campaignModal').style.display='none'}
+async function createCampaign(){
+  const name=document.getElementById('campName').value.trim()
+  const subject=document.getElementById('campSubject').value.trim()
+  const html_body=document.getElementById('campHtml').value
+  const recipients=document.getElementById('campRecipients').value
+  const scheduled_at=document.getElementById('campSchedule').value||null
+  if(!name||!subject||!html_body){toast('Fyll ut alle påkrevde felt','err');return}
+  const btn=document.getElementById('campCreateBtn');btn.disabled=true;btn.textContent='Oppretter...'
+  try{
+    await req('/campaigns',{method:'POST',body:JSON.stringify({name,subject,html_body,recipients,scheduled_at})})
+    toast('Kampanje opprettet!','ok')
+    closeCampaignModal()
+    document.getElementById('campName').value=''
+    document.getElementById('campSubject').value=''
+    document.getElementById('campHtml').value=''
+    document.getElementById('campRecipients').value=''
+    document.getElementById('campSchedule').value=''
+    loadCampaigns()
+  }catch(e){toast(e.message,'err')}finally{btn.disabled=false;btn.textContent='Opprett kampanje'}
+}
+async function sendCampaign(id){
+  if(!confirm('Send kampanjen til alle mottakere nå?'))return
+  try{
+    const r=await req('/campaigns/'+id+'/send',{method:'POST'})
+    toast(`Sendt! ${r.sent} e-poster levert, ${r.failed} feilet`,'ok')
+    loadCampaigns()
+  }catch(e){toast(e.message,'err')}
+}
+
 function showTab(name){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'))
   document.querySelectorAll('.tb-tab').forEach(t=>t.classList.remove('active'))
   const panel=document.getElementById('tab-'+name);if(panel)panel.classList.add('active')
   const navItem=document.querySelector('[data-tab="'+name+'"]');if(navItem)navItem.classList.add('active')
-  if(name==='queue')loadQueue();if(name==='calendar')loadCalendar();if(name==='stats'){loadStats();loadAnalytics()};if(name==='settings'){renderProjList();loadBilling();loadTeam()};if(name==='seo')loadSeoProfile();if(name==='smartplan')spInit()
+  if(name==='queue')loadQueue();if(name==='calendar')loadCalendar();if(name==='stats'){loadStats();loadAnalytics()};if(name==='settings'){renderProjList();loadBilling();loadTeam()};if(name==='seo')loadSeoProfile();if(name==='smartplan')spInit();if(name==='campaigns')loadCampaigns()
 }
 async function loadTemplates(){try{templates=await req('/content/templates');renderTpl()}catch{}}
 function renderTpl(){
