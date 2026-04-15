@@ -375,7 +375,8 @@ body::after{
 .qs-published{background:rgba(79,127,255,.12);color:var(--blue2)}
 .qi-body{flex:1}
 .qi-proj-tag{display:inline-block;font-size:9px;font-weight:700;padding:2px 8px;border-radius:4px;color:#fff;margin-bottom:8px}
-.qi-text{font-size:13px;color:var(--white);line-height:1.6;white-space:pre-wrap;word-break:break-word;max-height:200px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent}
+.qi-text{font-size:13px;color:var(--white);line-height:1.6;white-space:pre-wrap;word-break:break-word;max-height:160px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.15) transparent}
+.qi-text::-webkit-scrollbar{width:4px}.qi-text::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:4px}
 .qi-meta{font-size:10px;color:var(--muted);margin-top:8px}
 .qi-actions{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap}
 
@@ -2137,7 +2138,7 @@ function openSwipe(posts){
 function closeSwipe(){const o=document.getElementById('swipeOverlay');if(o)o.remove()}
 function renderSwipeCard(){
   const stack=document.getElementById('swipeStack');if(!stack)return;
-  if(swipeIdx>=swipePosts.length){stack.innerHTML='<div style="text-align:center;color:var(--muted);padding-top:100px"><div style="font-size:48px;margin-bottom:16px">✅</div><div style="font-size:16px;font-weight:600;color:var(--white)">Alle gjennomgått!</div></div>';setTimeout(()=>{closeSwipe();loadQueue();updateBadge()},1500);return}
+  if(swipeIdx>=swipePosts.length){stack.innerHTML='<div style="text-align:center;color:var(--muted);padding-top:80px"><div style="font-size:56px;margin-bottom:16px">🎉</div><div style="font-size:18px;font-weight:700;color:var(--white);margin-bottom:6px">Alle gjennomgått!</div><div style="font-size:13px;color:var(--muted)">Innholdet er klart — du finner alt i køen.</div></div>';const acts=document.querySelector('.swipe-actions');if(acts)acts.style.display='none';setTimeout(()=>{closeSwipe();loadQueue();updateBadge()},2000);return}
   const p=swipePosts[swipeIdx];
   const dc={linkedin:'dot-linkedin',facebook:'dot-facebook',instagram:'dot-instagram',twitter:'dot-twitter',email:'dot-email'};
   const aiLabels={claude:'Claude',gpt4o:'GPT-4o',gemini:'Gemini',grok:'Grok',deepseek:'DeepSeek'};
@@ -2198,7 +2199,7 @@ function renderQueue(){
       <div class="qi-left"><div class="qi-dot ${dc[p.platform]||''}"></div><div class="qi-plat">${p.platform}</div><div class="qi-status qs-${p.status}">${stLbl(p.status)}</div></div>
       <div class="qi-body">
         ${p.project_name?`<div class="qi-proj-tag" style="background:${p.project_color||'var(--blue)'}">${p.project_name}</div>`:''}
-        <div class="qi-text">${esc(p.content.substring(0,280))}${p.content.length>280?'...':''}</div>
+        <div class="qi-text">${esc(p.content)}</div>
         ${p.image_url?`<img src="${p.image_url}" alt="" style="width:100%;max-width:320px;border-radius:8px;margin:8px 0;display:block">`:''}
         <div class="qi-meta">${new Date(p.created_at).toLocaleString('no-NO')}</div>
         ${p.scheduled_at?`<div class="qi-meta" style="color:var(--blue2)">📅 Planlagt: ${new Date(p.scheduled_at).toLocaleString('no-NO')}</div>`:''}
