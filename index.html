@@ -798,17 +798,29 @@ body::after{
       <div style="flex:1;height:1px;background:var(--border2)"></div>
     </div>
 
-    <div class="auth-field" id="nameField" style="display:none">
-      <label class="auth-label">Navn</label>
-      <input class="auth-input" id="authName" placeholder="Heljar">
+    <div class="auth-field reg-field" id="nameField" style="display:none">
+      <label class="auth-label" id="labelName">Navn</label>
+      <input class="auth-input" id="authName" placeholder="Heljar" required>
+    </div>
+    <div class="auth-field reg-field" id="phoneField" style="display:none">
+      <label class="auth-label" id="labelPhone">Telefonnummer</label>
+      <input class="auth-input" id="authPhone" placeholder="+47 xxx xx xxx" type="tel" required>
     </div>
     <div class="auth-field">
-      <label class="auth-label">E-post</label>
-      <input class="auth-input" id="authEmail" placeholder="deg@dinbedrift.no" type="email">
+      <label class="auth-label" id="labelEmail">E-post</label>
+      <input class="auth-input" id="authEmail" placeholder="deg@dinbedrift.no" type="email" required>
+    </div>
+    <div class="auth-field reg-field" id="addressField" style="display:none">
+      <label class="auth-label" id="labelAddress">Adresse</label>
+      <input class="auth-input" id="authAddress" placeholder="Gateadresse, postnummer, by">
     </div>
     <div class="auth-field">
-      <label class="auth-label">Passord</label>
+      <label class="auth-label" id="labelPassword">Passord</label>
       <input class="auth-input" id="authPass" placeholder="••••••••" type="password" onkeydown="if(event.key==='Enter')doAuth()">
+    </div>
+    <div class="auth-field reg-field" id="inviteField" style="display:none">
+      <label class="auth-label" id="labelInvite">Invitasjonskode</label>
+      <input class="auth-input" id="authInviteCode" placeholder="F.eks. YEEYOO-BETA01" required>
     </div>
     <button class="auth-btn" onclick="doAuth()" id="authBtn">Logg inn →</button>
 
@@ -1644,7 +1656,8 @@ function hideLoading(){const l=document.getElementById('loadingScreen');if(l)l.s
 function showAuth(){hideLoading();document.getElementById('authWrap').style.display='flex';document.getElementById('app').style.display='none'}
 function toggleMode(){
   authMode=authMode==='login'?'register':'login'
-  document.getElementById('nameField').style.display=authMode==='register'?'block':'none'
+  const show=authMode==='register'?'block':'none'
+  document.querySelectorAll('.reg-field').forEach(f=>f.style.display=show)
   document.getElementById('authBtn').textContent=authMode==='register'?L('authRegister'):L('authLogin')
   document.getElementById('authToggle').innerHTML=authMode==='register'?`${L('authHasAccount')} <span>${L('authLoginLink')}</span>`:`${L('authNoAccount')} <span>${L('authRegisterLink')}</span>`
   document.getElementById('authErr').style.display='none'
@@ -1655,10 +1668,18 @@ async function doAuth(){
   const email=document.getElementById('authEmail').value.trim()
   const pass=document.getElementById('authPass').value
   const name=document.getElementById('authName').value.trim()
+  const phone=document.getElementById('authPhone').value.trim()
+  const address=document.getElementById('authAddress').value.trim()
+  const inviteInput=document.getElementById('authInviteCode').value.trim()
   const errEl=document.getElementById('authErr');errEl.style.display='none'
+  if(authMode==='register'){
+    if(!name){errEl.textContent='Navn er påkrevd';errEl.style.display='block';isSubmitting=false;return}
+    if(!phone){errEl.textContent='Telefonnummer er påkrevd';errEl.style.display='block';isSubmitting=false;return}
+    if(!inviteInput&&!verifiedInviteCode){errEl.textContent='Invitasjonskode er påkrevd';errEl.style.display='block';isSubmitting=false;return}
+  }
   document.getElementById('authBtn').innerHTML='<span class="spin"></span>'
   try{
-    const b=authMode==='register'?{name,email,password:pass,inviteCode:verifiedInviteCode||undefined}:{email,password:pass}
+    const b=authMode==='register'?{name,email,password:pass,phone,address:address||undefined,inviteCode:inviteInput||verifiedInviteCode||undefined}:{email,password:pass}
     const d=await req('/auth/'+(authMode==='register'?'register':'login'),{method:'POST',body:JSON.stringify(b)})
 
     if(d.needsVerification){
@@ -1710,7 +1731,8 @@ async function verifyInviteCode(){
       toast('Kode godkjent! Registrer deg nå.','ok')
       closeBetaGate()
       authMode='register'
-      document.getElementById('nameField').style.display='block'
+      document.querySelectorAll('.reg-field').forEach(f=>f.style.display='block')
+      document.getElementById('authInviteCode').value=d.code
       document.getElementById('authBtn').textContent=L('authRegister')
       document.getElementById('authToggle').innerHTML=`${L('authHasAccount')} <span>${L('authLoginLink')}</span>`
     }
@@ -2321,7 +2343,7 @@ const APP_I18N={
     createProject:'Opprett prosjekt →',allDone:'Alt klart!',allDoneSub:'Prosjektet er opprettet. Velg en innholdstype og klikk Generer for å lage ditt første innlegg.',
     startGenerating:'Start å generere ⚡',
     // Auth
-    authName:'Navn',authEmail:'E-post',authPassword:'Passord',authLogin:'Logg inn →',authRegister:'Registrer deg →',
+    authName:'Navn',authPhone:'Telefonnummer',authEmail:'E-post',authAddress:'Adresse',authPassword:'Passord',authInvite:'Invitasjonskode',authLogin:'Logg inn →',authRegister:'Registrer deg →',
     authNoAccount:'Ingen konto?',authHasAccount:'Har du konto?',authRegisterLink:'Registrer deg',authLoginLink:'Logg inn',
     authOr:'ELLER',authVipps:'Logg inn med Vipps',authGoogle:'Fortsett med Google',
     authLoggingIn:'Logger inn...',authRegistering:'Registrerer...',
@@ -2367,7 +2389,7 @@ const APP_I18N={
     companyName:'Company name',aboutCompany:'About the company',targetAudience:'Target audience',
     createProject:'Create project →',allDone:'All set!',allDoneSub:'Your project is created. Choose a content type and click Generate to create your first post.',
     startGenerating:'Start generating ⚡',
-    authName:'Name',authEmail:'Email',authPassword:'Password',authLogin:'Log in →',authRegister:'Sign up →',
+    authName:'Name',authPhone:'Phone number',authEmail:'Email',authAddress:'Address',authPassword:'Password',authInvite:'Invite code',authLogin:'Log in →',authRegister:'Sign up →',
     authNoAccount:'No account?',authHasAccount:'Have an account?',authRegisterLink:'Sign up',authLoginLink:'Log in',
     authOr:'OR',authVipps:'Log in with Vipps',authGoogle:'Continue with Google',
     authLoggingIn:'Logging in...',authRegistering:'Signing up...',
@@ -2408,7 +2430,7 @@ const APP_I18N={
     companyName:'Nombre de la empresa',aboutCompany:'Sobre la empresa',targetAudience:'Público objetivo',
     createProject:'Crear proyecto →',allDone:'¡Todo listo!',allDoneSub:'Tu proyecto está creado. Elige un tipo de contenido y haz clic en Generar.',
     startGenerating:'Empezar a generar ⚡',
-    authName:'Nombre',authEmail:'Correo electrónico',authPassword:'Contraseña',authLogin:'Iniciar sesión →',authRegister:'Registrarse →',
+    authName:'Nombre',authPhone:'Teléfono',authEmail:'Correo electrónico',authAddress:'Dirección',authPassword:'Contraseña',authInvite:'Código de invitación',authLogin:'Iniciar sesión →',authRegister:'Registrarse →',
     authNoAccount:'¿Sin cuenta?',authHasAccount:'¿Ya tienes cuenta?',authRegisterLink:'Regístrate',authLoginLink:'Iniciar sesión',
     authOr:'O',authVipps:'Iniciar sesión con Vipps',authGoogle:'Continuar con Google',
     authLoggingIn:'Iniciando sesión...',authRegistering:'Registrando...',
@@ -2449,7 +2471,7 @@ const APP_I18N={
     companyName:'Nome da empresa',aboutCompany:'Sobre a empresa',targetAudience:'Público-alvo',
     createProject:'Criar projeto →',allDone:'Tudo pronto!',allDoneSub:'Seu projeto foi criado. Escolha um tipo de conteúdo e clique em Gerar.',
     startGenerating:'Começar a gerar ⚡',
-    authName:'Nome',authEmail:'E-mail',authPassword:'Senha',authLogin:'Entrar →',authRegister:'Cadastrar →',
+    authName:'Nome',authPhone:'Telefone',authEmail:'E-mail',authAddress:'Endereço',authPassword:'Senha',authInvite:'Código de convite',authLogin:'Entrar →',authRegister:'Cadastrar →',
     authNoAccount:'Sem conta?',authHasAccount:'Já tem conta?',authRegisterLink:'Cadastre-se',authLoginLink:'Entrar',
     authOr:'OU',authVipps:'Entrar com Vipps',authGoogle:'Continuar com Google',
     authLoggingIn:'Entrando...',authRegistering:'Cadastrando...',
@@ -2667,10 +2689,12 @@ function applyAppLang(){
   if(pl)pl.textContent=L('project')
 
   // ── Auth form (if visible) ──
-  const authLabels=document.querySelectorAll('.auth-label')
-  if(authLabels[0])authLabels[0].textContent=L('authName')
-  if(authLabels[1])authLabels[1].textContent=L('authEmail')
-  if(authLabels[2])authLabels[2].textContent=L('authPassword')
+  const lN=document.getElementById('labelName');if(lN)lN.textContent=L('authName')
+  const lP=document.getElementById('labelPhone');if(lP)lP.textContent=L('authPhone')
+  const lE=document.getElementById('labelEmail');if(lE)lE.textContent=L('authEmail')
+  const lA=document.getElementById('labelAddress');if(lA)lA.textContent=L('authAddress')
+  const lPw=document.getElementById('labelPassword');if(lPw)lPw.textContent=L('authPassword')
+  const lI=document.getElementById('labelInvite');if(lI)lI.textContent=L('authInvite')
   const authBtn=document.getElementById('authBtn')
   if(authBtn&&!authBtn.querySelector('.spin')){
     authBtn.textContent=authMode==='register'?L('authRegister'):L('authLogin')
