@@ -1880,7 +1880,7 @@ async function genImage(postId){
 
   try{
     const text=body.innerText.substring(0,500)
-    const d=await req('/images/branded',{method:'POST',body:JSON.stringify({postId,text,platform,projectName:projName})})
+    const d=await req('/images/generate',{method:'POST',body:JSON.stringify({postId,text,platform,projectName:projName})})
     if(!d.image)throw new Error('Ingen bilde')
     imgArea.innerHTML=`<img src="${d.image}" alt="Generert bilde" style="width:100%;display:block;border-radius:10px"/>
       <div class="rc-image-actions">
