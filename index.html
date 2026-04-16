@@ -1650,7 +1650,10 @@ async function req(path,opts={}){
   const text=await r.text()
   let d
   try{d=text?JSON.parse(text):{}}catch{d={error:'Ugyldig respons fra server'}}
-  if(!r.ok)throw new Error(d.error||'Feil ('+r.status+')')
+  if(!r.ok){
+    if(r.status===401&&d.redirect){token=null;localStorage.removeItem('token');window.location.href=d.redirect;return}
+    throw new Error(d.error||'Feil ('+r.status+')')
+  }
   return d
 }
 function hideLoading(){const l=document.getElementById('loadingScreen');if(l)l.style.display='none'}
@@ -2868,6 +2871,7 @@ async function exportCSV(){
   toast('Laster ned...','info')
   try{
     const r=await fetch(API+'/export/csv',{headers:{'Authorization':'Bearer '+token}})
+    if(r.status===401){token=null;localStorage.removeItem('token');window.location.href='/login';return}
     const blob=await r.blob()
     const a=document.createElement('a');a.href=URL.createObjectURL(blob)
     a.download='yeeyoo-innhold.csv';a.click();URL.revokeObjectURL(a.href)
