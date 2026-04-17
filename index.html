@@ -1652,7 +1652,7 @@ async function req(path,opts={}){
   let d
   try{d=text?JSON.parse(text):{}}catch{d={error:'Ugyldig respons fra server'}}
   if(!r.ok){
-    if(r.status===401&&d.redirect){token=null;localStorage.removeItem('token');window.location.href=d.redirect;return}
+    if(r.status===401&&d.redirect){console.warn('[AUTH] 401 from',path,d.error);token=null;sessionStorage.removeItem('yeeyoo_token');window.location.href=d.redirect;return}
     throw new Error(d.error||'Feil ('+r.status+')')
   }
   return d
@@ -2875,7 +2875,7 @@ async function exportCSV(){
   toast('Laster ned...','info')
   try{
     const r=await fetch(API+'/export/csv',{headers:{'Authorization':'Bearer '+token}})
-    if(r.status===401){token=null;localStorage.removeItem('token');window.location.href='/login';return}
+    if(r.status===401){console.warn('[AUTH] 401 from /export/csv');token=null;sessionStorage.removeItem('yeeyoo_token');window.location.href='/login';return}
     const blob=await r.blob()
     const a=document.createElement('a');a.href=URL.createObjectURL(blob)
     a.download='yeeyoo-innhold.csv';a.click();URL.revokeObjectURL(a.href)
