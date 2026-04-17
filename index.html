@@ -322,6 +322,7 @@ body::after{
 .rc-image img{width:100%;display:block;border-radius:10px}
 .rc-image-loading{display:flex;align-items:center;justify-content:center;height:200px;background:rgba(255,255,255,.03);border-radius:10px;gap:10px}
 .rc-image-loading .spin-img{width:24px;height:24px;border:3px solid rgba(255,255,255,.1);border-top-color:var(--purple2);border-radius:50%;animation:spin .7s linear infinite}
+.spin-sm{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
 .rc-image-loading span{color:var(--muted);font-size:13px;font-weight:600}
 .rc-image-error{display:flex;flex-direction:column;align-items:center;justify-content:center;height:180px;background:linear-gradient(135deg,rgba(45,91,227,.08),rgba(124,58,237,.08));border-radius:10px;gap:8px;cursor:pointer}
 .rc-image-error span{font-size:13px;color:var(--muted)}
@@ -1931,15 +1932,17 @@ async function generate(){
   finally{btn.disabled=false;btn.textContent=L('generateBtn');led.className='led ok';document.getElementById('ledTxt').textContent=L('ready');setTimeout(()=>{led.className='led'},3000)}
 }
 
-async function genImage(postId){
+async function genImage(postId,ev){
+  if(ev)ev.stopPropagation()
   const btn=document.getElementById('imgbtn-'+postId)
   const imgArea=document.getElementById('img-'+postId)
-  const body=document.getElementById('body-'+postId)
-  if(!body)return
+  // Support both results view (body-${id}) and queue view (.qi-text)
   const card=document.querySelector('[data-id="'+postId+'"]')
-  const platform=card?.querySelector('.plat-name')?.textContent||'linkedin'
+  const body=document.getElementById('body-'+postId)||card?.querySelector('.qi-text')
+  if(!body||!btn||!imgArea)return
+  const platform=card?.querySelector('.plat-name')?.textContent||card?.querySelector('.qi-plat')?.textContent||'linkedin'
   const projName=projects.find(p=>p.id===currentProjectId)?.name||''
-  btn.classList.add('loading');btn.textContent='⏳ Genererer...'
+  btn.disabled=true;btn.classList.add('loading');btn.innerHTML='<span class="spin-sm"></span> Genererer...'
   imgArea.style.display='block'
   imgArea.innerHTML=`<div class="rc-image-loading"><div class="spin-img"></div><span>Genererer bilde...</span></div>`
 
@@ -1952,8 +1955,8 @@ async function genImage(postId){
         <a href="${d.image}" download="yeeyoo-${postId}.png" class="rbtn" style="color:var(--ok)">⬇ Last ned</a>
         <button class="rbtn" onclick="navigator.clipboard.writeText(this.parentElement.previousElementSibling.src);toast('Bilde-URL kopiert','ok')">📋 Kopier</button>
       </div>`
-    btn.textContent='🖼 Generer bilde';btn.classList.remove('loading')
-  }catch(e){showImgError(postId,imgArea,btn,e.message)}
+    btn.disabled=false;btn.innerHTML='🖼 Generer bilde';btn.classList.remove('loading')
+  }catch(e){btn.disabled=false;showImgError(postId,imgArea,btn,e.message)}
 }
 
 async function loadImgWithFallback(url,postId,imgArea,btn){
@@ -2111,7 +2114,7 @@ function renderResults(posts){
         <button class="rbtn approve" onclick="approvePost('${p.id}')">✓ Godkjenn</button>
         <button class="rbtn" onclick="openScheduleModal('${p.id}')" style="color:var(--blue2)">📅 Planlegg</button>
         <button class="rbtn" onclick="copyPost('${p.id}')" title="Kopier tekst">📋 Kopier tekst</button>
-        <button class="rbtn img" id="imgbtn-${p.id}" onclick="genImage('${p.id}')">🖼 Generer bilde</button>
+        <button class="rbtn img" id="imgbtn-${p.id}" onclick="genImage('${p.id}',event)">🖼 Generer bilde</button>
         <button class="rbtn regen" onclick="regenPost('${p.id}','${p.platform}')">↻ Regenerer</button>
         <button class="rbtn del" onclick="delPost('${p.id}')">✕</button>
       </div>
@@ -2151,7 +2154,7 @@ function renderSwipeCard(){
     <div class="sc-body">${esc(p.content)}</div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px">
       <div class="sc-ai" style="margin:0">${aiLabels[p.ai_model]||p.ai_model||'AI'} · ${p.content.length} tegn</div>
-      <button class="rbtn img" onclick="event.stopPropagation();closeSwipe();genImage('${p.id}')" style="font-size:12px;padding:4px 10px;color:var(--blue2)">🖼 Generer bilde</button>
+      <button class="rbtn img" onclick="event.stopPropagation();closeSwipe();genImage('${p.id}',event)" style="font-size:12px;padding:4px 10px;color:var(--blue2)">🖼 Generer bilde</button>
     </div>
   </div>`;
   document.getElementById('swipeCtr').textContent=(swipeIdx+1)+'/'+swipePosts.length;
@@ -2211,8 +2214,10 @@ function renderQueue(){
           ${p.status==='approved'?`<button class="rbtn approve" onclick="chSt('${p.id}','published')">↑ Publisert</button>`:''}
           ${(p.status==='pending'||p.status==='approved')?`<button class="rbtn" onclick="openScheduleModal('${p.id}')" style="color:var(--blue2)">📅 Planlegg</button>`:''}
           <button class="rbtn" onclick="cpTxt(\`${escA(p.content)}\`)">⎘ Kopi</button>
+          <button class="rbtn img" id="imgbtn-${p.id}" onclick="genImage('${p.id}',event)">🖼 Generer bilde</button>
           <button class="rbtn del" onclick="qDel('${p.id}')">✕</button>
         </div>
+        <div class="rc-image" id="img-${p.id}" style="${p.image_url?'display:block':'display:none'}">${p.image_url?`<img src="${p.image_url}" alt="Generert bilde" style="width:100%;max-width:320px;display:block;border-radius:10px"/><div class="rc-image-actions"><a href="${p.image_url}" download="yeeyoo-${p.id}.png" class="rbtn" style="color:var(--ok)">⬇ Last ned</a></div>`:''}</div>
       </div>
     </div>`).join('')
 }
