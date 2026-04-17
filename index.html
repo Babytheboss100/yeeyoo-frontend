@@ -2114,7 +2114,7 @@ function renderResults(posts){
         <button class="rbtn approve" onclick="approvePost('${p.id}')">✓ Godkjenn</button>
         <button class="rbtn" onclick="openScheduleModal('${p.id}')" style="color:var(--blue2)">📅 Planlegg</button>
         <button class="rbtn" onclick="copyPost('${p.id}')" title="Kopier tekst">📋 Kopier tekst</button>
-        <button class="rbtn img" id="imgbtn-${p.id}" onclick="genImage('${p.id}',event)">🖼 Generer bilde</button>
+        <button class="rbtn img" id="imgbtn-${p.id}" onclick="event.preventDefault();event.stopPropagation();genImage('${p.id}',event)">🖼 Generer bilde</button>
         <button class="rbtn regen" onclick="regenPost('${p.id}','${p.platform}')">↻ Regenerer</button>
         <button class="rbtn del" onclick="delPost('${p.id}')">✕</button>
       </div>
