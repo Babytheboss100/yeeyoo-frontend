@@ -2206,7 +2206,6 @@ function renderQueue(){
       <div class="qi-body">
         ${p.project_name?`<div class="qi-proj-tag" style="background:${p.project_color||'var(--blue)'}">${p.project_name}</div>`:''}
         <div class="qi-text">${esc(p.content)}</div>
-        ${p.image_url?`<img src="${p.image_url}" alt="" style="width:100%;max-width:320px;border-radius:8px;margin:8px 0;display:block">`:''}
         <div class="qi-meta">${new Date(p.created_at).toLocaleString('no-NO')}</div>
         ${p.scheduled_at?`<div class="qi-meta" style="color:var(--blue2)">📅 Planlagt: ${new Date(p.scheduled_at).toLocaleString('no-NO')}</div>`:''}
         <div class="qi-actions">
@@ -2214,7 +2213,7 @@ function renderQueue(){
           ${p.status==='approved'?`<button class="rbtn approve" onclick="chSt('${p.id}','published')">↑ Publisert</button>`:''}
           ${(p.status==='pending'||p.status==='approved')?`<button class="rbtn" onclick="openScheduleModal('${p.id}')" style="color:var(--blue2)">📅 Planlegg</button>`:''}
           <button class="rbtn" onclick="cpTxt(\`${escA(p.content)}\`)">⎘ Kopi</button>
-          <button class="rbtn img" id="imgbtn-${p.id}" onclick="genImage('${p.id}',event)">🖼 Generer bilde</button>
+          <button class="rbtn img" id="imgbtn-${p.id}" onclick="event.preventDefault();event.stopPropagation();genImage('${p.id}',event)">🖼 Generer bilde</button>
           <button class="rbtn del" onclick="qDel('${p.id}')">✕</button>
         </div>
         <div class="rc-image" id="img-${p.id}" style="${p.image_url?'display:block':'display:none'}">${p.image_url?`<img src="${p.image_url}" alt="Generert bilde" style="width:100%;max-width:320px;display:block;border-radius:10px"/><div class="rc-image-actions"><a href="${p.image_url}" download="yeeyoo-${p.id}.png" class="rbtn" style="color:var(--ok)">⬇ Last ned</a></div>`:''}</div>
